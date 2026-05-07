@@ -139,16 +139,19 @@ WSGI_APPLICATION = "config.wsgi.application"
 # =========================
 # Database (Neon Postgres)
 # =========================
-# Ex.: DATABASE_URL=postgresql://user:pass@ep-...-pooler.c-3.us-east-1.aws.neon.tech/neondb
+# Ex.: DATABASE_URL=postgresql://user:pass@ep-...-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
 _db_url = env("DATABASE_URL", default="")
+
 if _db_url:
-    _db_scheme = _db_url.split(":", 1)[0].lower()
-    _ssl_require = _db_scheme in {"postgres", "postgresql", "postgresql_psycopg2"}
+    # Não force SSL aqui.
+    # Produção/Neon deve controlar SSL pela própria DATABASE_URL:
+    #   ?sslmode=require
+    # CI/GitHub Actions pode usar:
+    #   ?sslmode=disable
     DATABASES = {
         "default": dj_database_url.parse(
             _db_url,
             conn_max_age=600,
-            ssl_require=_ssl_require,
         )
     }
 else:
