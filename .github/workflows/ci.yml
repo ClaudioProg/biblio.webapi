@@ -9,8 +9,23 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: biblio_ci
+          POSTGRES_USER: biblio
+          POSTGRES_PASSWORD: biblio
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U biblio -d biblio_ci"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
     env:
-      DATABASE_URL: sqlite:///db.sqlite3
+      DATABASE_URL: postgres://biblio:biblio@127.0.0.1:5432/biblio_ci
       SECRET_KEY: dummy-secret-key
       DEBUG: "False"
       PYTHONWARNINGS: ignore
