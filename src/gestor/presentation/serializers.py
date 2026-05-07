@@ -7,6 +7,7 @@ from gestor.domain.entities.unidade import Unidade
 from gestor.domain.entities.livro_unidade import LivroUnidade
 from gestor.domain.entities.tipo_obra import TipoObra
 from gestor.domain.entities.genero import Genero  # necessário porque o Livro usa "genero" (FK)
+from gestor.domain.entities.usuario import Usuario
 
 
 # ============== Unidades ==============
@@ -14,6 +15,12 @@ class UnidadeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Unidade
         fields = ["id", "nome", "endereco", "telefone", "email", "site"]
+
+
+class UsuarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuario
+        fields = ["id", "nome", "email", "telefone", "documento", "ativo", "observacoes"]
 
 
 # ============== LivroUnidade (write / read) ==============

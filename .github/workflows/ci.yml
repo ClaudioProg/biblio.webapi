@@ -25,11 +25,6 @@ jobs:
           --health-retries=12
 
     env:
-      DATABASE_NAME: biblio_ci
-      DATABASE_USER: biblio
-      DATABASE_PASSWORD: biblio
-      DATABASE_HOST: 127.0.0.1
-      DATABASE_PORT: 3306
       DATABASE_URL: mysql://biblio:biblio@127.0.0.1:3306/biblio_ci
       SECRET_KEY: dummy-secret-key
       DEBUG: "False"
