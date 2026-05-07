@@ -141,14 +141,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 # =========================
 # Ex.: DATABASE_URL=postgresql://user:pass@ep-...-pooler.c-3.us-east-1.aws.neon.tech/neondb
 _db_url = env("DATABASE_URL", default="")
+
 if _db_url:
-    _db_scheme = _db_url.split(":", 1)[0].lower()
-    _ssl_require = _db_scheme in {"postgres", "postgresql", "postgresql_psycopg2"}
     DATABASES = {
         "default": dj_database_url.parse(
             _db_url,
             conn_max_age=600,
-            ssl_require=_ssl_require,
+            ssl_require=True,
         )
     }
 else:
@@ -190,24 +189,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # DRF / Schemas / Renderers
 # =========================
 if DEBUG:
-    REST_FRAMEWORK = {
-        "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-        "DEFAULT_RENDERER_CLASSES": [
-            "rest_framework.renderers.JSONRenderer",
             "rest_framework.renderers.BrowsableAPIRenderer",  # docs navegáveis no DEV
         ],
     }
 else:
     REST_FRAMEWORK = {
-        "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
         "DEFAULT_RENDERER_CLASSES": [
             "rest_framework.renderers.JSONRenderer",  # somente JSON em produção
         ],
     }
-
-# 🔓 Permissões abertas temporariamente (sem autenticação real)
-REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
-    "rest_framework.permissions.AllowAny"
 ]
 
 # 🔧 Sem paginação global -> lista vira array puro (evita {"results":[...]})

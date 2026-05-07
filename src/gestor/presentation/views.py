@@ -13,10 +13,12 @@ from gestor.domain.entities.unidade import Unidade
 from gestor.domain.entities.livro_unidade import LivroUnidade
 from gestor.domain.entities.genero import Genero
 from gestor.domain.entities.tipo_obra import TipoObra
+from gestor.domain.entities.usuario import Usuario
 from gestor.presentation.serializers import (
     LivroSerializer,
     UnidadeSerializer,
     LivroUnidadeSerializer,
+    UsuarioSerializer,
 )
 from gestor.infrastructure.external_book_services import (
     OpenLibraryLookupService,
@@ -40,6 +42,31 @@ class UnidadeViewSet(viewsets.ModelViewSet):
     search_fields = ["nome", "endereco", "telefone", "email", "site"]
     ordering_fields = ["id", "nome"]
     ordering = ["id"]
+
+    def list(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+        s = self.get_serializer(qs, many=True)
+        return Response(s.data)
+
+
+class UsuarioViewSet(viewsets.ModelViewSet):
+    queryset = Usuario.objects.all().order_by("id")
+    serializer_class = UsuarioSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = None
+
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["nome", "email", "telefone", "documento", "observacoes"]
+    ordering_fields = ["id", "nome", "email", "ativo"]
+    ordering = ["id"]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        ativo = self.request.query_params.get("ativo")
+        if ativo is not None:
+            ativo_bool = ativo.lower() in ["true", "1", "yes"]
+            qs = qs.filter(ativo=ativo_bool)
+        return qs
 
     def list(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())
