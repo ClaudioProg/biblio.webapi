@@ -113,12 +113,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 # =========================
 # Ex.: DATABASE_URL=postgresql://user:pass@ep-...-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
 _db_url = env("DATABASE_URL", default="")
+
 if _db_url:
+    # No GitHub Actions usamos Postgres local sem SSL.
+    # Em produção/Neon, a própria DATABASE_URL deve trazer sslmode=require.
     DATABASES = {
         "default": dj_database_url.parse(
             _db_url,
             conn_max_age=600,
-            ssl_require=True,
         )
     }
 else:
