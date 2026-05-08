@@ -8,6 +8,7 @@ from gestor.domain.entities.livro_unidade import LivroUnidade
 from gestor.domain.entities.tipo_obra import TipoObra
 from gestor.domain.entities.genero import Genero  # necessário porque o Livro usa "genero" (FK)
 from gestor.domain.entities.usuario import Usuario
+from gestor.domain.entities.emprestimo import Emprestimo
 
 
 # ============== Unidades ==============
@@ -21,6 +22,89 @@ class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
         fields = ["id", "nome", "email", "telefone", "documento", "ativo", "observacoes"]
+
+
+class EmprestimoSerializer(serializers.ModelSerializer):
+    livro = serializers.PrimaryKeyRelatedField(queryset=Livro.objects.all())
+    unidade = serializers.PrimaryKeyRelatedField(queryset=Unidade.objects.all(), required=True)
+    usuario = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
+    livro_titulo = serializers.CharField(source="livro.titulo", read_only=True)
+    unidade_nome = serializers.CharField(source="unidade.nome", read_only=True)
+    usuario_nome = serializers.CharField(source="usuario.nome", read_only=True)
+
+    class Meta:
+        model = Emprestimo
+        fields = [
+            "id",
+            "livro",
+            "unidade",
+            "usuario",
+            "livro_titulo",
+            "unidade_nome",
+            "usuario_nome",
+            "data_emprestimo",
+            "data_prevista_devolucao",
+            "data_devolucao",
+            "status",
+            "observacoes",
+        ]
+
+    def validate(self, attrs):
+        livro = attrs.get("livro", getattr(self.instance, "livro", None))
+        unidade = attrs.get("unidade", getattr(self.instance, "unidade", None))
+        data_emprestimo = attrs.get("data_emprestimo", getattr(self.instance, "data_emprestimo", None))
+        data_prevista = attrs.get(
+            "data_prevista_devolucao",
+            getattr(self.instance, "data_prevista_devolucao", None),
+        )
+        data_devolucao = attrs.get("data_devolucao", getattr(self.instance, "data_devolucao", None))
+        status = attrs.get("status", getattr(self.instance, "status", Emprestimo.STATUS_ABERTO))
+
+        if not unidade:
+            raise serializers.ValidationError({"unidade": "Unidade é obrigatória no empréstimo."})
+
+        if not livro:
+            raise serializers.ValidationError({"livro": "Livro é obrigatório no empréstimo."})
+
+        livro_unidade = LivroUnidade.objects.filter(livro=livro, unidade=unidade).first()
+        if not livro_unidade or livro_unidade.exemplares <= 0:
+            raise serializers.ValidationError(
+                {"unidade": "Este livro não possui exemplares disponíveis na unidade selecionada."}
+            )
+
+        if status == Emprestimo.STATUS_ABERTO:
+            emprestimos_abertos = Emprestimo.objects.filter(
+                livro=livro,
+                unidade=unidade,
+                status=Emprestimo.STATUS_ABERTO,
+            )
+            if self.instance and self.instance.pk:
+                emprestimos_abertos = emprestimos_abertos.exclude(pk=self.instance.pk)
+
+            if emprestimos_abertos.count() >= livro_unidade.exemplares:
+                raise serializers.ValidationError(
+                    {"livro": "Sem disponibilidade deste livro na unidade selecionada para novo empréstimo."}
+                )
+
+        if data_prevista and data_emprestimo and data_prevista < data_emprestimo:
+            raise serializers.ValidationError(
+                {"data_prevista_devolucao": "Data prevista não pode ser anterior à data de empréstimo."}
+            )
+
+        if data_devolucao and data_emprestimo and data_devolucao < data_emprestimo:
+            raise serializers.ValidationError(
+                {"data_devolucao": "Data de devolução não pode ser anterior à data de empréstimo."}
+            )
+
+        if status == Emprestimo.STATUS_DEVOLVIDO and not data_devolucao:
+            raise serializers.ValidationError(
+                {"data_devolucao": "Informe a data de devolução para finalizar o empréstimo."}
+            )
+
+        if data_devolucao and status == Emprestimo.STATUS_ABERTO:
+            attrs["status"] = Emprestimo.STATUS_DEVOLVIDO
+
+        return attrs
 
 
 # ============== LivroUnidade (write / read) ==============

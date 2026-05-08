@@ -189,15 +189,24 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # DRF / Schemas / Renderers
 # =========================
 if DEBUG:
+    REST_FRAMEWORK = {
+        "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+        "DEFAULT_RENDERER_CLASSES": [
+            "rest_framework.renderers.JSONRenderer",
             "rest_framework.renderers.BrowsableAPIRenderer",  # docs navegáveis no DEV
         ],
     }
 else:
     REST_FRAMEWORK = {
+        "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
         "DEFAULT_RENDERER_CLASSES": [
             "rest_framework.renderers.JSONRenderer",  # somente JSON em produção
         ],
     }
+
+# 🔓 Permissões abertas temporariamente (sem autenticação real)
+REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
+    "rest_framework.permissions.AllowAny"
 ]
 
 # 🔧 Sem paginação global -> lista vira array puro (evita {"results":[...]})
