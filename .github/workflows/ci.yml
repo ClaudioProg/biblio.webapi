@@ -24,7 +24,7 @@ jobs:
           --health-timeout=5s
           --health-retries=12
 
-        env:
+    env:
       DATABASE_URL: postgres://biblio:biblio@127.0.0.1:5432/biblio_ci?sslmode=disable
       SECRET_KEY: dummy-secret-key
       DEBUG: "False"
