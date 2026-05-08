@@ -14,11 +14,13 @@ from gestor.domain.entities.livro_unidade import LivroUnidade
 from gestor.domain.entities.genero import Genero
 from gestor.domain.entities.tipo_obra import TipoObra
 from gestor.domain.entities.usuario import Usuario
+from gestor.domain.entities.emprestimo import Emprestimo
 from gestor.presentation.serializers import (
     LivroSerializer,
     UnidadeSerializer,
     LivroUnidadeSerializer,
     UsuarioSerializer,
+    EmprestimoSerializer,
 )
 from gestor.infrastructure.external_book_services import (
     OpenLibraryLookupService,
@@ -66,6 +68,49 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         if ativo is not None:
             ativo_bool = ativo.lower() in ["true", "1", "yes"]
             qs = qs.filter(ativo=ativo_bool)
+        return qs
+
+    def list(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+        s = self.get_serializer(qs, many=True)
+        return Response(s.data)
+
+
+class EmprestimoViewSet(viewsets.ModelViewSet):
+    queryset = (
+        Emprestimo.objects.all()
+        .select_related("livro", "usuario", "unidade")
+        .order_by("-data_emprestimo", "-id")
+    )
+    serializer_class = EmprestimoSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = None
+
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["livro__titulo", "usuario__nome", "unidade__nome", "status", "observacoes"]
+    ordering_fields = ["id", "data_emprestimo", "data_prevista_devolucao", "status"]
+    ordering = ["-data_emprestimo", "-id"]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        p = self.request.query_params
+
+        livro_id = p.get("livro")
+        if livro_id:
+            qs = qs.filter(livro_id=livro_id)
+
+        usuario_id = p.get("usuario")
+        if usuario_id:
+            qs = qs.filter(usuario_id=usuario_id)
+
+        unidade_id = p.get("unidade")
+        if unidade_id:
+            qs = qs.filter(unidade_id=unidade_id)
+
+        status = p.get("status")
+        if status:
+            qs = qs.filter(status=status)
+
         return qs
 
     def list(self, request, *args, **kwargs):
