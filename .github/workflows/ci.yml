@@ -26,6 +26,7 @@ jobs:
 
     env:
       DATABASE_URL: postgres://biblio:biblio@127.0.0.1:5432/biblio_ci?sslmode=disable
+      DATABASE_SSL_REQUIRE: "False"
       SECRET_KEY: dummy-secret-key
       DEBUG: "False"
       PYTHONWARNINGS: ignore
