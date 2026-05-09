@@ -1,5 +1,6 @@
 # 📄 src/gestor/presentation/serializers.py
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 from rest_framework import serializers
 
 from gestor.domain.entities.livro import Livro
@@ -31,6 +32,8 @@ class EmprestimoSerializer(serializers.ModelSerializer):
     livro_titulo = serializers.CharField(source="livro.titulo", read_only=True)
     unidade_nome = serializers.CharField(source="unidade.nome", read_only=True)
     usuario_nome = serializers.CharField(source="usuario.nome", read_only=True)
+    data_prevista_devolucao = serializers.DateField(required=False, allow_null=True)
+    data_devolucao = serializers.DateField(required=False, allow_null=True)
 
     class Meta:
         model = Emprestimo
@@ -49,7 +52,27 @@ class EmprestimoSerializer(serializers.ModelSerializer):
             "observacoes",
         ]
 
+    def validate_data_emprestimo(self, value):
+        """Validar que data de empréstimo não é futura."""
+        if value and value > timezone.localdate():
+            raise serializers.ValidationError("Data de empréstimo não pode estar no futuro.")
+        return value
+
+    def validate_observacoes(self, value):
+        """Sanitizar observações: trim e limite de caracteres."""
+        if value:
+            value = str(value).strip()
+            if len(value) > 1000:
+                raise serializers.ValidationError("Observações não devem exceder 1000 caracteres.")
+        return value or None
+
     def validate(self, attrs):
+        # Limpar strings vazias em campos de data opcionais
+        if attrs.get("data_prevista_devolucao") == "":
+            attrs["data_prevista_devolucao"] = None
+        if attrs.get("data_devolucao") == "":
+            attrs["data_devolucao"] = None
+
         livro = attrs.get("livro", getattr(self.instance, "livro", None))
         unidade = attrs.get("unidade", getattr(self.instance, "unidade", None))
         data_emprestimo = attrs.get("data_emprestimo", getattr(self.instance, "data_emprestimo", None))

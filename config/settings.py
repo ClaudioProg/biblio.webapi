@@ -231,6 +231,8 @@ CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
     default=[
         "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
         "https://bibliotecasconectadas.vercel.app",
     ],
 )
@@ -238,6 +240,7 @@ CORS_ALLOWED_ORIGINS = env.list(
 # Permitir previews *.vercel.app (além do domínio principal)
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://.*\.vercel\.app$",
+    r"^http://localhost:\d+$",
 ]
 
 # Cabeçalhos e métodos padrão
