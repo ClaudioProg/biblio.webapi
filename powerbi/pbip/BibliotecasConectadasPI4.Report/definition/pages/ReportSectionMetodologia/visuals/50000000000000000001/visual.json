@@ -1,0 +1,93 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "50000000000000000001",
+  "position": {
+    "x": 20,
+    "y": 20,
+    "z": 1000,
+    "height": 100,
+    "width": 1240,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Qualidade IBGE"
+                    }
+                  },
+                  "Property": "Bairros no recorte"
+                }
+              },
+              "queryRef": "Qualidade IBGE.Bairros no recorte",
+              "nativeQueryRef": "Bairros no recorte"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Qualidade IBGE"
+                    }
+                  },
+                  "Property": "Bairros com renda publicada"
+                }
+              },
+              "queryRef": "Qualidade IBGE.Bairros com renda publicada",
+              "nativeQueryRef": "Bairros com renda publicada"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Qualidade IBGE"
+                    }
+                  },
+                  "Property": "Bairros sem renda publicada"
+                }
+              },
+              "queryRef": "Qualidade IBGE.Bairros sem renda publicada",
+              "nativeQueryRef": "Bairros sem renda publicada"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Qualidade IBGE"
+                    }
+                  },
+                  "Property": "Diferenças Básico × Demografia"
+                }
+              },
+              "queryRef": "Qualidade IBGE.Diferenças Básico × Demografia",
+              "nativeQueryRef": "Diferenças Básico × Demografia"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Qualidade IBGE"
+                    }
+                  },
+                  "Property": "Diferenças Demografia × Faixas Etárias"
+                }
+              },
+              "queryRef": "Qualidade IBGE.Diferenças Demografia × Faixas Etárias",
+              "nativeQueryRef": "Diferenças Demografia × Faixas Etárias"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
