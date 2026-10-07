@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date, datetime
 from typing import Any
 
 from django.db.models import Count, Max, Min, Sum
@@ -17,7 +18,11 @@ from gestor.infrastructure.territory_service import (
 def _month_key(value) -> str | None:
     if value is None:
         return None
-    return value.date().isoformat().replace(value.date().isoformat()[8:10], "01")
+    if isinstance(value, datetime):
+        value = value.date()
+    if isinstance(value, date):
+        return value.replace(day=1).isoformat()
+    raise TypeError(f"Tipo de mês inesperado: {type(value)!r}")
 
 
 def _decimal_or_none(value):
@@ -81,7 +86,7 @@ def build_powerbi_dataset() -> dict[str, Any]:
 
     fato_circulacao_mensal = [
         {
-            "mes": row["mes"].date().replace(day=1).isoformat(),
+            "mes": _month_key(row["mes"]),
             "unidade_id": row["unidade_id"],
             "ibge_bairro_codigo": row["unidade__ibge_bairro_codigo"],
             "genero": row["livro__genero__nome"] or "Não informado",
@@ -105,7 +110,7 @@ def build_powerbi_dataset() -> dict[str, Any]:
 
     fato_devolucoes_mensal = [
         {
-            "mes": row["mes"].date().replace(day=1).isoformat(),
+            "mes": _month_key(row["mes"]),
             "unidade_id": row["unidade_id"],
             "ibge_bairro_codigo": row["unidade__ibge_bairro_codigo"],
             "genero": row["livro__genero__nome"] or "Não informado",
