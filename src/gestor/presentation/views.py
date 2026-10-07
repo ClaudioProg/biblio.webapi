@@ -48,6 +48,24 @@ from gestor.infrastructure.powerbi_service import build_powerbi_dataset
 # Autenticação da equipe gestora
 # =========================================================
 
+POWERBI_READER_GROUP = "powerbi_reader"
+
+
+class PowerBIAnalyticsPermission(permissions.BasePermission):
+    message = "Conta sem permissão para acessar o dataset analítico do Power BI."
+
+    def has_permission(self, request, view):
+        user = getattr(request, "user", None)
+        if not user or not user.is_authenticated or not user.is_active:
+            return False
+
+        return bool(
+            user.is_staff
+            or user.is_superuser
+            or user.groups.filter(name=POWERBI_READER_GROUP).exists()
+        )
+
+
 @api_view(["POST"])
 @permission_classes([permissions.AllowAny])
 def auth_login(request):
@@ -65,6 +83,12 @@ def auth_login(request):
         return Response(
             {"detail": "Credenciais inválidas."},
             status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    if not (user.is_staff or user.is_superuser):
+        return Response(
+            {"detail": "Conta sem permissão para acessar a gestão da plataforma."},
+            status=status.HTTP_403_FORBIDDEN,
         )
 
     token, _ = Token.objects.get_or_create(user=user)
@@ -546,6 +570,7 @@ def analytics_resumo(_request):
 )
 @api_view(["GET"])
 @authentication_classes([BasicAuthentication, TokenAuthentication])
+@permission_classes([PowerBIAnalyticsPermission])
 def analytics_powerbi(_request):
     return Response(build_powerbi_dataset())
 

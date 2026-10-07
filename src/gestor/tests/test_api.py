@@ -2,6 +2,7 @@ import base64
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
@@ -84,6 +85,69 @@ class GestorApiRegressionTests(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 401)
+
+    def test_nonstaff_account_cannot_login_to_management(self):
+        reader = get_user_model().objects.create_user(
+            username="powerbi_only",
+            password="PowerBI123!Seguro",
+            is_staff=False,
+        )
+        group, _ = Group.objects.get_or_create(name="powerbi_reader")
+        reader.groups.add(group)
+
+        public_client = APIClient()
+        response = public_client.post(
+            "/gestor/auth/login/",
+            {"username": "powerbi_only", "password": "PowerBI123!Seguro"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(Token.objects.filter(user=reader).exists())
+
+    def test_powerbi_reader_group_can_use_basic_auth_only_for_dataset(self):
+        reader = get_user_model().objects.create_user(
+            username="powerbi_reader_test",
+            password="PowerBI123!Seguro",
+            is_staff=False,
+        )
+        group, _ = Group.objects.get_or_create(name="powerbi_reader")
+        reader.groups.add(group)
+
+        credentials = base64.b64encode(
+            b"powerbi_reader_test:PowerBI123!Seguro"
+        ).decode("ascii")
+        public_client = APIClient()
+
+        dataset = public_client.get(
+            "/gestor/analytics/powerbi/",
+            HTTP_AUTHORIZATION=f"Basic {credentials}",
+        )
+        users = public_client.get(
+            "/gestor/usuarios/",
+            HTTP_AUTHORIZATION=f"Basic {credentials}",
+        )
+
+        self.assertEqual(dataset.status_code, 200)
+        self.assertFalse(dataset.data["meta"]["contem_dados_pessoais"])
+        self.assertEqual(users.status_code, 401)
+
+    def test_nonstaff_basic_account_without_powerbi_group_is_forbidden(self):
+        get_user_model().objects.create_user(
+            username="basic_sem_grupo",
+            password="PowerBI123!Seguro",
+            is_staff=False,
+        )
+        credentials = base64.b64encode(
+            b"basic_sem_grupo:PowerBI123!Seguro"
+        ).decode("ascii")
+
+        response = APIClient().get(
+            "/gestor/analytics/powerbi/",
+            HTTP_AUTHORIZATION=f"Basic {credentials}",
+        )
+
+        self.assertEqual(response.status_code, 403)
 
     def test_logout_invalidates_token(self):
         response = self.client.post("/gestor/auth/logout/", {}, format="json")
