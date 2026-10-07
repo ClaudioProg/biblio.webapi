@@ -1,7 +1,7 @@
 /// Contexto sociodemográfico agregado dos bairros de Santos com base no Censo Demográfico 2022.
 table Bairros
 
-	measure População = SUM(Bairros['População Total'])
+	measure População = SUM(Bairros[População Total])
 		formatString: #,##0
 
 	column 'Código do Bairro'
