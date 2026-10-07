@@ -78,6 +78,27 @@ def load_territory_snapshot() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     return rows, validation
 
 
+def neighborhood_by_code(code: str) -> dict[str, Any] | None:
+    normalized = str(code or "").strip()
+    if not normalized:
+        return None
+
+    rows, _validation = load_territory_snapshot()
+    return next(
+        (row for row in rows if row["cd_bairro"] == normalized),
+        None,
+    )
+
+
+def neighborhood_name_by_code(code: str) -> str | None:
+    row = neighborhood_by_code(code)
+    return str(row["bairro"]) if row else None
+
+
+def is_valid_neighborhood_code(code: str) -> bool:
+    return neighborhood_by_code(code) is not None
+
+
 def territory_payload(
     *,
     neighborhood_code: str = "",

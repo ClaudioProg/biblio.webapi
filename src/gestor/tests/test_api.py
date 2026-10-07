@@ -149,6 +149,42 @@ class GestorApiRegressionTests(APITestCase):
         self.assertEqual(delete.status_code, 204)
         self.assertFalse(Unidade.objects.filter(pk=unidade_id).exists())
 
+    def test_unidade_accepts_valid_ibge_neighborhood_and_exposes_name(self):
+        response = self.client.post(
+            "/gestor/unidades/",
+            {
+                "nome": "Biblioteca territorial",
+                "endereco": "Avenida de teste",
+                "telefone": "",
+                "email": "",
+                "site": "",
+                "ibge_bairro_codigo": "3548500005",
+                "latitude": "-23.979587",
+                "longitude": "-46.314403",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["ibge_bairro_codigo"], "3548500005")
+        self.assertEqual(response.data["ibge_bairro_nome"], "Aparecida")
+        self.assertEqual(str(response.data["latitude"]), "-23.979587")
+        self.assertEqual(str(response.data["longitude"]), "-46.314403")
+
+    def test_unidade_rejects_unknown_ibge_neighborhood_code(self):
+        response = self.client.post(
+            "/gestor/unidades/",
+            {
+                "nome": "Biblioteca inválida",
+                "endereco": "Avenida de teste",
+                "ibge_bairro_codigo": "9999999999",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("ibge_bairro_codigo", response.data)
+
     def test_livro_create_persists_unidades_and_exemplares(self):
         response = self.client.post(
             "/gestor/livros/",
@@ -408,6 +444,24 @@ class GestorApiRegressionTests(APITestCase):
         self.assertNotIn(usuario.email, serialized)
         if usuario.documento:
             self.assertNotIn(usuario.documento, serialized)
+
+    def test_analytics_summary_links_unit_to_ibge_neighborhood(self):
+        self.unidade_a.ibge_bairro_codigo = "3548500005"
+        self.unidade_a.latitude = "-23.979587"
+        self.unidade_a.longitude = "-46.314403"
+        self.unidade_a.save(
+            update_fields=["ibge_bairro_codigo", "latitude", "longitude"]
+        )
+        self._livro(isbn="9780000000013", exemplares=2)
+
+        response = self.client.get("/gestor/analytics/resumo/")
+
+        self.assertEqual(response.status_code, 200)
+        unidade = response.data["por_unidade"][0]
+        self.assertEqual(unidade["ibge_bairro_codigo"], "3548500005")
+        self.assertEqual(unidade["ibge_bairro_nome"], "Aparecida")
+        self.assertEqual(str(unidade["latitude"]), "-23.979587")
+        self.assertEqual(str(unidade["longitude"]), "-46.314403")
 
     def test_analytics_requires_authentication(self):
         public_client = APIClient()
