@@ -414,6 +414,46 @@ class GestorApiRegressionTests(APITestCase):
         response = public_client.get("/gestor/analytics/resumo/")
         self.assertEqual(response.status_code, 401)
 
+    def test_territory_analytics_returns_70_neighborhoods(self):
+        response = self.client.get("/gestor/analytics/territorio/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["cobertura"]["bairros_total"], 70)
+        self.assertEqual(response.data["cobertura"]["bairros_com_renda"], 55)
+        self.assertEqual(response.data["cobertura"]["bairros_sem_renda"], 15)
+        self.assertFalse(response.data["meta"]["contem_dados_pessoais"])
+        self.assertEqual(len(response.data["bairros"]), 70)
+
+    def test_territory_analytics_can_filter_paqueta_by_code(self):
+        response = self.client.get(
+            "/gestor/analytics/territorio/?codigo=3548500016"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["bairros"]), 1)
+        bairro = response.data["bairros"][0]
+        self.assertEqual(bairro["bairro"], "Paquetá")
+        self.assertEqual(bairro["cd_bairro"], "3548500016")
+        self.assertTrue(bairro["renda_disponivel"])
+
+    def test_territory_analytics_preserves_missing_income_as_null(self):
+        response = self.client.get(
+            "/gestor/analytics/territorio/?codigo=3548500031"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["bairros"]), 1)
+        bairro = response.data["bairros"][0]
+        self.assertEqual(bairro["bairro"], "Porto Valongo")
+        self.assertFalse(bairro["renda_disponivel"])
+        self.assertIsNone(bairro["renda_responsavel_media"])
+        self.assertIsNone(bairro["renda_responsavel_mediana"])
+
+    def test_territory_analytics_requires_authentication(self):
+        public_client = APIClient()
+        response = public_client.get("/gestor/analytics/territorio/")
+        self.assertEqual(response.status_code, 401)
+
     @patch("gestor.presentation.views.TranslationService.translate_book_payload")
     @patch("gestor.presentation.views.OpenLibraryLookupService.lookup")
     def test_isbn_lookup_returns_book_metadata(
