@@ -550,6 +550,8 @@ class GestorApiRegressionTests(APITestCase):
         acervo = response.data["fato_acervo"][0]
         self.assertEqual(acervo["unidade_id"], self.unidade_a.id)
         self.assertEqual(acervo["exemplares"], 2)
+        self.assertEqual(acervo["emprestimos_abertos"], 1)
+        self.assertEqual(acervo["exemplares_disponiveis"], 1)
 
         meses = {
             row["mes"]: row["emprestimos_iniciados"]
