@@ -406,7 +406,8 @@ class GestorApiRegressionTests(APITestCase):
 
         serialized = str(response.data)
         self.assertNotIn(usuario.email, serialized)
-        self.assertNotIn(usuario.documento or "", serialized)
+        if usuario.documento:
+            self.assertNotIn(usuario.documento, serialized)
 
     def test_analytics_requires_authentication(self):
         public_client = APIClient()
