@@ -1,0 +1,288 @@
+{
+  "generated_from_official_sources_on": "2026-10-07",
+  "municipio_ibge": "3548500",
+  "bairros": {
+    "basic": 70,
+    "demography": 70,
+    "literacy": 70,
+    "income": 55
+  },
+  "missing_income_count": 15,
+  "missing_income_neighborhoods": [
+    {
+      "cd_bairro": "3548500031",
+      "bairro": "Porto Valongo"
+    },
+    {
+      "cd_bairro": "3548500032",
+      "bairro": "Porto Paquetá"
+    },
+    {
+      "cd_bairro": "3548500033",
+      "bairro": "Outeirinho"
+    },
+    {
+      "cd_bairro": "3548500038",
+      "bairro": "Porto Saboó"
+    },
+    {
+      "cd_bairro": "3548500047",
+      "bairro": "Morro Chico de Paula"
+    },
+    {
+      "cd_bairro": "3548500048",
+      "bairro": "Porto Alamoa"
+    },
+    {
+      "cd_bairro": "3548500049",
+      "bairro": "Porto Macuco"
+    },
+    {
+      "cd_bairro": "3548500053",
+      "bairro": "Morro Embaré"
+    },
+    {
+      "cd_bairro": "3548500055",
+      "bairro": "Porto Ponta da Praia"
+    },
+    {
+      "cd_bairro": "3548500058",
+      "bairro": "Trindade"
+    },
+    {
+      "cd_bairro": "3548500062",
+      "bairro": "Quilombo"
+    },
+    {
+      "cd_bairro": "3548500063",
+      "bairro": "Nossa Senhora das Neves"
+    },
+    {
+      "cd_bairro": "3548500064",
+      "bairro": "Ilha Barnabé"
+    },
+    {
+      "cd_bairro": "3548500069",
+      "bairro": "Piaçaguera"
+    },
+    {
+      "cd_bairro": "3548500070",
+      "bairro": "Bagres"
+    }
+  ],
+  "population_source_mismatch_count": 11,
+  "population_source_mismatches": [
+    {
+      "cd_bairro": "3548500008",
+      "bairro": "Macuco",
+      "populacao_total": 17461,
+      "populacao_demografia": 17442
+    },
+    {
+      "cd_bairro": "3548500017",
+      "bairro": "Centro",
+      "populacao_total": 530,
+      "populacao_demografia": 525
+    },
+    {
+      "cd_bairro": "3548500020",
+      "bairro": "Saboó",
+      "populacao_total": 9848,
+      "populacao_demografia": 9843
+    },
+    {
+      "cd_bairro": "3548500025",
+      "bairro": "Santa Maria",
+      "populacao_total": 5795,
+      "populacao_demografia": 5793
+    },
+    {
+      "cd_bairro": "3548500026",
+      "bairro": "Bom Retiro",
+      "populacao_total": 5838,
+      "populacao_demografia": 5812
+    },
+    {
+      "cd_bairro": "3548500040",
+      "bairro": "Vila Progresso",
+      "populacao_total": 3110,
+      "populacao_demografia": 3104
+    },
+    {
+      "cd_bairro": "3548500043",
+      "bairro": "Morro Marapé",
+      "populacao_total": 1002,
+      "populacao_demografia": 989
+    },
+    {
+      "cd_bairro": "3548500044",
+      "bairro": "Morro Nova Cintra",
+      "populacao_total": 7405,
+      "populacao_demografia": 7338
+    },
+    {
+      "cd_bairro": "3548500047",
+      "bairro": "Morro Chico de Paula",
+      "populacao_total": 2,
+      "populacao_demografia": 0
+    },
+    {
+      "cd_bairro": "3548500058",
+      "bairro": "Trindade",
+      "populacao_total": 6,
+      "populacao_demografia": 0
+    },
+    {
+      "cd_bairro": "3548500063",
+      "bairro": "Nossa Senhora das Neves",
+      "populacao_total": 2,
+      "populacao_demografia": 0
+    }
+  ],
+  "age_classified_total_difference_count": 22,
+  "age_classified_total_differences": [
+    {
+      "cd_bairro": "3548500001",
+      "bairro": "José Menino",
+      "populacao_demografia": 11209,
+      "populacao_idade_classificada": 11193
+    },
+    {
+      "cd_bairro": "3548500002",
+      "bairro": "Gonzaga",
+      "populacao_demografia": 26820,
+      "populacao_idade_classificada": 26783
+    },
+    {
+      "cd_bairro": "3548500003",
+      "bairro": "Boqueirão",
+      "populacao_demografia": 30478,
+      "populacao_idade_classificada": 30463
+    },
+    {
+      "cd_bairro": "3548500004",
+      "bairro": "Embaré",
+      "populacao_demografia": 35934,
+      "populacao_idade_classificada": 35918
+    },
+    {
+      "cd_bairro": "3548500005",
+      "bairro": "Aparecida",
+      "populacao_demografia": 33792,
+      "populacao_idade_classificada": 33780
+    },
+    {
+      "cd_bairro": "3548500006",
+      "bairro": "Ponta da Praia",
+      "populacao_demografia": 34898,
+      "populacao_idade_classificada": 34896
+    },
+    {
+      "cd_bairro": "3548500010",
+      "bairro": "Campo Grande",
+      "populacao_demografia": 25569,
+      "populacao_idade_classificada": 25568
+    },
+    {
+      "cd_bairro": "3548500016",
+      "bairro": "Paquetá",
+      "populacao_demografia": 703,
+      "populacao_idade_classificada": 697
+    },
+    {
+      "cd_bairro": "3548500017",
+      "bairro": "Centro",
+      "populacao_demografia": 525,
+      "populacao_idade_classificada": 516
+    },
+    {
+      "cd_bairro": "3548500018",
+      "bairro": "Valongo",
+      "populacao_demografia": 54,
+      "populacao_idade_classificada": 51
+    },
+    {
+      "cd_bairro": "3548500019",
+      "bairro": "Monte Serrat",
+      "populacao_demografia": 1324,
+      "populacao_idade_classificada": 1314
+    },
+    {
+      "cd_bairro": "3548500037",
+      "bairro": "Morro Pacheco",
+      "populacao_demografia": 1776,
+      "populacao_idade_classificada": 1768
+    },
+    {
+      "cd_bairro": "3548500041",
+      "bairro": "Morro Saboó",
+      "populacao_demografia": 1311,
+      "populacao_idade_classificada": 1305
+    },
+    {
+      "cd_bairro": "3548500044",
+      "bairro": "Morro Nova Cintra",
+      "populacao_demografia": 7338,
+      "populacao_idade_classificada": 7330
+    },
+    {
+      "cd_bairro": "3548500045",
+      "bairro": "Morro Caneleira",
+      "populacao_demografia": 1627,
+      "populacao_idade_classificada": 1623
+    },
+    {
+      "cd_bairro": "3548500046",
+      "bairro": "Morro Santa Maria",
+      "populacao_demografia": 2501,
+      "populacao_idade_classificada": 2495
+    },
+    {
+      "cd_bairro": "3548500050",
+      "bairro": "Pompéia",
+      "populacao_demografia": 12399,
+      "populacao_idade_classificada": 12390
+    },
+    {
+      "cd_bairro": "3548500052",
+      "bairro": "Morro José Menino",
+      "populacao_demografia": 3731,
+      "populacao_idade_classificada": 3730
+    },
+    {
+      "cd_bairro": "3548500054",
+      "bairro": "Morro Cachoeira",
+      "populacao_demografia": 43,
+      "populacao_idade_classificada": 37
+    },
+    {
+      "cd_bairro": "3548500056",
+      "bairro": "Guarapá",
+      "populacao_demografia": 18,
+      "populacao_idade_classificada": 9
+    },
+    {
+      "cd_bairro": "3548500059",
+      "bairro": "Cabuçu",
+      "populacao_demografia": 18,
+      "populacao_idade_classificada": 11
+    },
+    {
+      "cd_bairro": "3548500060",
+      "bairro": "Iriri",
+      "populacao_demografia": 29,
+      "populacao_idade_classificada": 21
+    }
+  ],
+  "rules": {
+    "missing_markers": [
+      "",
+      ".",
+      "X",
+      "x"
+    ],
+    "incomplete_derived_group_becomes_null": true,
+    "missing_income_becomes_zero": false,
+    "literacy_rate_denominator": "population_15_plus_from_literacy_theme"
+  }
+}
