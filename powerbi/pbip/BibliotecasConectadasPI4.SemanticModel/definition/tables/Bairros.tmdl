@@ -1,6 +1,9 @@
 /// Contexto sociodemográfico agregado dos bairros de Santos com base no Censo Demográfico 2022.
 table Bairros
 
+	measure População = SUM(Bairros['População Total'])
+		formatString: #,##0
+
 	column 'Código do Bairro'
 		dataType: string
 		isHidden
@@ -11,6 +14,11 @@ table Bairros
 		dataType: string
 		summarizeBy: none
 		sourceColumn: bairro
+
+	column Localização
+		dataType: string
+		summarizeBy: none
+		sourceColumn: localizacao
 
 	column 'Área km²'
 		dataType: decimal
@@ -131,6 +139,12 @@ table Bairros
 						{"renda_disponivel", type logical}
 					},
 					"pt-BR"
+				),
+				ComLocalizacao = Table.AddColumn(
+					Tipos,
+					"localizacao",
+					each [bairro] & ", Santos, SP, Brasil",
+					type text
 				)
 			in
-				Tipos
+				ComLocalizacao
