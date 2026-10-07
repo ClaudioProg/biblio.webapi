@@ -33,7 +33,10 @@ from gestor.infrastructure.external_book_services import (
     IsbnNotFoundError,
 )
 from gestor.infrastructure.translation_service import TranslationService
-from gestor.infrastructure.territory_service import territory_payload
+from gestor.infrastructure.territory_service import (
+    neighborhood_name_by_code,
+    territory_payload,
+)
 
 # =========================================================
 # Autenticação da equipe gestora
@@ -147,7 +150,14 @@ class UnidadeViewSet(ProtectLoanHistoryMixin, viewsets.ModelViewSet):
     pagination_class = None
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ["nome", "endereco", "telefone", "email", "site"]
+    search_fields = [
+        "nome",
+        "endereco",
+        "telefone",
+        "email",
+        "site",
+        "ibge_bairro_codigo",
+    ]
     ordering_fields = ["id", "nome"]
     ordering = ["id"]
 
@@ -437,7 +447,13 @@ def analytics_resumo(_request):
 
     por_unidade = []
     for row in (
-        LivroUnidade.objects.values("unidade_id", "unidade__nome")
+        LivroUnidade.objects.values(
+            "unidade_id",
+            "unidade__nome",
+            "unidade__ibge_bairro_codigo",
+            "unidade__latitude",
+            "unidade__longitude",
+        )
         .annotate(
             titulos=Count("livro_id", distinct=True),
             exemplares=Sum("exemplares"),
@@ -452,7 +468,15 @@ def analytics_resumo(_request):
                 "emprestimos_devolvidos": 0,
             },
         )
-        por_unidade.append({**row, **movimento})
+        bairro_codigo = row.get("unidade__ibge_bairro_codigo")
+        por_unidade.append({
+            **row,
+            **movimento,
+            "ibge_bairro_codigo": bairro_codigo,
+            "ibge_bairro_nome": neighborhood_name_by_code(bairro_codigo),
+            "latitude": row.get("unidade__latitude"),
+            "longitude": row.get("unidade__longitude"),
+        })
 
     return Response({
         "meta": {
@@ -496,6 +520,10 @@ def analytics_resumo(_request):
             {
                 "unidade_id": row["unidade_id"],
                 "unidade": row["unidade__nome"],
+                "ibge_bairro_codigo": row.get("ibge_bairro_codigo"),
+                "ibge_bairro_nome": row.get("ibge_bairro_nome"),
+                "latitude": row.get("latitude"),
+                "longitude": row.get("longitude"),
                 "titulos": row["titulos"],
                 "exemplares": row["exemplares"] or 0,
                 "emprestimos_total": row["emprestimos_total"],
