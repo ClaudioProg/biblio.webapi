@@ -89,6 +89,12 @@ class EmprestimoSerializer(serializers.ModelSerializer):
         if not livro:
             raise serializers.ValidationError({"livro": "Livro é obrigatório no empréstimo."})
 
+        usuario = attrs.get("usuario", getattr(self.instance, "usuario", None))
+        if status == Emprestimo.STATUS_ABERTO and usuario and not usuario.ativo:
+            raise serializers.ValidationError({
+                "usuario": "Usuário inativo não pode manter ou receber empréstimo aberto."
+            })
+
         livro_unidade = LivroUnidade.objects.filter(livro=livro, unidade=unidade).first()
         if not livro_unidade or livro_unidade.exemplares <= 0:
             raise serializers.ValidationError(
@@ -141,12 +147,29 @@ class LivroUnidadeWriteSerializer(serializers.ModelSerializer):
 
 
 class LivroUnidadeReadSerializer(serializers.ModelSerializer):
-    # devolve dados da unidade
+    # devolve dados da unidade e disponibilidade atual
     unidade = UnidadeSerializer(read_only=True)
+    emprestimos_abertos = serializers.SerializerMethodField()
+    exemplares_disponiveis = serializers.SerializerMethodField()
 
     class Meta:
         model = LivroUnidade
-        fields = ["unidade", "exemplares"]
+        fields = [
+            "unidade",
+            "exemplares",
+            "emprestimos_abertos",
+            "exemplares_disponiveis",
+        ]
+
+    def get_emprestimos_abertos(self, obj):
+        return Emprestimo.objects.filter(
+            livro=obj.livro,
+            unidade=obj.unidade,
+            status=Emprestimo.STATUS_ABERTO,
+        ).count()
+
+    def get_exemplares_disponiveis(self, obj):
+        return max(0, int(obj.exemplares) - self.get_emprestimos_abertos(obj))
 
 
 # HÍBRIDO para manter compatibilidade com LivroUnidadeViewSet (read + write)
