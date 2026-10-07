@@ -381,6 +381,36 @@ class GestorApiRegressionTests(APITestCase):
         self.assertEqual(detalhe["emprestimos_abertos"], 1)
         self.assertEqual(detalhe["exemplares_disponiveis"], 1)
 
+    def test_analytics_summary_is_aggregated_and_contains_no_personal_data(self):
+        livro = self._livro(isbn="9780000000012", exemplares=3)
+        usuario = self._usuario("j")
+        Emprestimo.objects.create(
+            livro=livro,
+            unidade=self.unidade_a,
+            usuario=usuario,
+            data_emprestimo="2026-05-18",
+            status=Emprestimo.STATUS_ABERTO,
+        )
+
+        response = self.client.get("/gestor/analytics/resumo/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.data["meta"]["contém_dados_pessoais"])
+        self.assertEqual(response.data["resumo"]["titulos"], 1)
+        self.assertEqual(response.data["resumo"]["exemplares"], 3)
+        self.assertEqual(response.data["resumo"]["emprestimos_abertos"], 1)
+        self.assertEqual(response.data["acervo_por_genero"][0]["genero"], self.genero.nome)
+        self.assertEqual(response.data["por_unidade"][0]["unidade"], self.unidade_a.nome)
+
+        serialized = str(response.data)
+        self.assertNotIn(usuario.email, serialized)
+        self.assertNotIn(usuario.documento or "", serialized)
+
+    def test_analytics_requires_authentication(self):
+        public_client = APIClient()
+        response = public_client.get("/gestor/analytics/resumo/")
+        self.assertEqual(response.status_code, 401)
+
     def test_database_debug_endpoint_is_not_exposed(self):
         response = self.client.get("/gestor/debug/db-info/")
         self.assertEqual(response.status_code, 404)

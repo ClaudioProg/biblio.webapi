@@ -1,5 +1,5 @@
 # 📁 src/gestor/presentation/views.py
-from django.db.models import Q
+from django.db.models import Count, Q, Sum
 from django.db.models.deletion import ProtectedError
 from django.core.cache import cache
 from django.conf import settings
@@ -387,6 +387,123 @@ class LivroViewSet(ProtectLoanHistoryMixin, viewsets.ModelViewSet):
         qs = self.filter_queryset(self.get_queryset())
         s = self.get_serializer(qs, many=True)
         return Response(s.data)
+
+
+# ---------- Analytics agregados (base para dashboard / Power BI) ----------
+@api_view(["GET"])
+def analytics_resumo(_request):
+    total_exemplares = (
+        LivroUnidade.objects.aggregate(total=Sum("exemplares")).get("total") or 0
+    )
+
+    emprestimos_por_status = {
+        row["status"]: row["total"]
+        for row in Emprestimo.objects.values("status").annotate(total=Count("id"))
+    }
+
+    por_genero = list(
+        LivroUnidade.objects.values("livro__genero__nome")
+        .annotate(
+            titulos=Count("livro_id", distinct=True),
+            exemplares=Sum("exemplares"),
+        )
+        .order_by("-exemplares", "livro__genero__nome")
+    )
+
+    por_tipo = list(
+        LivroUnidade.objects.values("livro__tipo_obra__nome")
+        .annotate(
+            titulos=Count("livro_id", distinct=True),
+            exemplares=Sum("exemplares"),
+        )
+        .order_by("-exemplares", "livro__tipo_obra__nome")
+    )
+
+    emprestimos_unidade = {
+        row["unidade_id"]: {
+            "emprestimos_total": row["total"],
+            "emprestimos_abertos": row["abertos"],
+            "emprestimos_devolvidos": row["devolvidos"],
+        }
+        for row in Emprestimo.objects.exclude(unidade_id=None)
+        .values("unidade_id")
+        .annotate(
+            total=Count("id"),
+            abertos=Count("id", filter=Q(status=Emprestimo.STATUS_ABERTO)),
+            devolvidos=Count("id", filter=Q(status=Emprestimo.STATUS_DEVOLVIDO)),
+        )
+    }
+
+    por_unidade = []
+    for row in (
+        LivroUnidade.objects.values("unidade_id", "unidade__nome")
+        .annotate(
+            titulos=Count("livro_id", distinct=True),
+            exemplares=Sum("exemplares"),
+        )
+        .order_by("unidade__nome")
+    ):
+        movimento = emprestimos_unidade.get(
+            row["unidade_id"],
+            {
+                "emprestimos_total": 0,
+                "emprestimos_abertos": 0,
+                "emprestimos_devolvidos": 0,
+            },
+        )
+        por_unidade.append({**row, **movimento})
+
+    return Response({
+        "meta": {
+            "escopo": "dados agregados da plataforma Bibliotecas Conectadas",
+            "contém_dados_pessoais": False,
+            "observacao": (
+                "Estes indicadores descrevem o acervo e a circulação registrada na "
+                "plataforma. Não representam, por si só, a demanda sociodemográfica."
+            ),
+        },
+        "resumo": {
+            "titulos": Livro.objects.count(),
+            "exemplares": total_exemplares,
+            "unidades": Unidade.objects.count(),
+            "usuarios_ativos": Usuario.objects.filter(ativo=True).count(),
+            "emprestimos_total": Emprestimo.objects.count(),
+            "emprestimos_abertos": emprestimos_por_status.get(
+                Emprestimo.STATUS_ABERTO, 0
+            ),
+            "emprestimos_devolvidos": emprestimos_por_status.get(
+                Emprestimo.STATUS_DEVOLVIDO, 0
+            ),
+        },
+        "acervo_por_genero": [
+            {
+                "genero": row["livro__genero__nome"] or "Não informado",
+                "titulos": row["titulos"],
+                "exemplares": row["exemplares"] or 0,
+            }
+            for row in por_genero
+        ],
+        "acervo_por_tipo": [
+            {
+                "tipo_obra": row["livro__tipo_obra__nome"] or "Não informado",
+                "titulos": row["titulos"],
+                "exemplares": row["exemplares"] or 0,
+            }
+            for row in por_tipo
+        ],
+        "por_unidade": [
+            {
+                "unidade_id": row["unidade_id"],
+                "unidade": row["unidade__nome"],
+                "titulos": row["titulos"],
+                "exemplares": row["exemplares"] or 0,
+                "emprestimos_total": row["emprestimos_total"],
+                "emprestimos_abertos": row["emprestimos_abertos"],
+                "emprestimos_devolvidos": row["emprestimos_devolvidos"],
+            }
+            for row in por_unidade
+        ],
+    })
 
 
 # ---------- Endpoint utilitário ----------
