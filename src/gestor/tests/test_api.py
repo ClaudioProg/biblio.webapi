@@ -15,6 +15,7 @@ from gestor.domain.entities.usuario import Usuario
 from gestor.domain.entities.emprestimo import Emprestimo
 from gestor.infrastructure.external_book_services import (
     BookMetadataLookupService,
+    BrasilApiLookupService,
     GoogleBooksLookupService,
     IsbnNotFoundError,
     isbn_equivalents,
@@ -735,6 +736,58 @@ class GestorApiRegressionTests(APITestCase):
             {"8587600826", "9788587600820"},
         )
 
+    def test_brasilapi_maps_fundamentos_em_infectologia(self):
+        service = BrasilApiLookupService()
+        payload = service._map_to_payload(
+            "9788587600820",
+            {
+                "isbn": "8587600826",
+                "title": "FUNDAMENTOS EM INFECTOLOGIA",
+                "authors": [
+                    "ENIO ROBERTO PIETRA PEDROSO",
+                    "MANOEL OTÁVIO DA COSTA ROCHA",
+                ],
+                "publisher": "RUBIO",
+                "year": None,
+                "page_count": None,
+                "cover_url": None,
+                "provider": "cbl",
+            },
+        )
+
+        self.assertEqual(payload["titulo"], "FUNDAMENTOS EM INFECTOLOGIA")
+        self.assertEqual(payload["editora"], "RUBIO")
+        self.assertIn("ENIO ROBERTO PIETRA PEDROSO", payload["autor"])
+        self.assertEqual(payload["source"], "brasilapi:cbl")
+
+    def test_brasilapi_accepts_equivalent_isbn10_response(self):
+        service = BrasilApiLookupService()
+        self.assertTrue(
+            service._matches_requested_isbn(
+                "9788587600820",
+                {"isbn": "8587600826"},
+            )
+        )
+
+    def test_brasilapi_maps_etnografias_even_without_authors(self):
+        service = BrasilApiLookupService()
+        payload = service._map_to_payload(
+            "9788576173755",
+            {
+                "isbn": "9788576173755",
+                "title": "Etnografias em serviços de saúde",
+                "authors": [],
+                "publisher": "Garamond",
+                "year": None,
+                "page_count": None,
+                "provider": "cbl",
+            },
+        )
+        self.assertEqual(payload["titulo"], "Etnografias em serviços de saúde")
+        self.assertEqual(payload["autor"], "")
+        self.assertEqual(payload["editora"], "Garamond")
+        self.assertEqual(payload["source"], "brasilapi:cbl")
+
     def test_google_books_requires_exact_identifier_match(self):
         service = GoogleBooksLookupService()
         item = {
@@ -801,6 +854,10 @@ class GestorApiRegressionTests(APITestCase):
             side_effect=IsbnNotFoundError("não encontrado"),
         ), patch.object(
             service.providers[1],
+            "lookup",
+            side_effect=IsbnNotFoundError("não encontrado"),
+        ), patch.object(
+            service.providers[2],
             "lookup",
             return_value=expected,
         ):
