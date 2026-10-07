@@ -1,0 +1,90 @@
+/// Dimensão mensal para análise temporal de empréstimos e devoluções.
+table Calendário
+
+	column 'Mês Início'
+		dataType: dateTime
+		formatString: MMM/yyyy
+		summarizeBy: none
+		sourceColumn: MesInicio
+
+	column Ano
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: Ano
+
+	column 'Número do Mês'
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: MesNumero
+
+	column Mês
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Mes
+		sortByColumn: 'Número do Mês'
+
+	column 'Ano-Mês'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: AnoMes
+
+	column Trimestre
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Trimestre
+
+	hierarchy Período
+		level Ano
+			column: Ano
+		level Mês
+			column: Mês
+
+	partition Calendário = m
+		mode: import
+		source =
+			let
+				Fonte = Json.Document(
+					Web.Contents(
+						"https://biblio-webapi.onrender.com",
+						[
+							RelativePath = "gestor/analytics/powerbi/",
+							Headers = [Accept = "application/json"],
+							Timeout = #duration(0, 0, 2, 0)
+						]
+					)
+				),
+				Periodo = Fonte[periodo],
+				PrimeiroTexto = Periodo[primeiro_emprestimo],
+				UltimoEmprestimoTexto = Periodo[ultimo_emprestimo],
+				UltimaDevolucaoTexto = Periodo[ultima_devolucao],
+				Hoje = Date.From(DateTime.LocalNow()),
+				InicioBase = if PrimeiroTexto = null then Hoje else Date.FromText(PrimeiroTexto),
+				Finais = List.RemoveNulls(
+					{
+						if UltimoEmprestimoTexto = null then null else Date.FromText(UltimoEmprestimoTexto),
+						if UltimaDevolucaoTexto = null then null else Date.FromText(UltimaDevolucaoTexto)
+					}
+				),
+				FimBase = if List.Count(Finais) = 0 then Hoje else List.Max(Finais),
+				Inicio = Date.StartOfMonth(InicioBase),
+				Fim = Date.StartOfMonth(FimBase),
+				Meses = List.Generate(
+					() => Inicio,
+					each _ <= Fim,
+					each Date.AddMonths(_, 1)
+				),
+				Tabela = Table.FromList(Meses, Splitter.SplitByNothing(), {"MesInicio"}),
+				TipoData = Table.TransformColumnTypes(Tabela, {{"MesInicio", type date}}),
+				ComAno = Table.AddColumn(TipoData, "Ano", each Date.Year([MesInicio]), Int64.Type),
+				ComNumeroMes = Table.AddColumn(ComAno, "MesNumero", each Date.Month([MesInicio]), Int64.Type),
+				ComMes = Table.AddColumn(ComNumeroMes, "Mes", each Date.MonthName([MesInicio], "pt-BR"), type text),
+				ComAnoMes = Table.AddColumn(ComMes, "AnoMes", each Date.ToText([MesInicio], "yyyy-MM"), type text),
+				ComTrimestre = Table.AddColumn(
+					ComAnoMes,
+					"Trimestre",
+					each "T" & Text.From(Date.QuarterOfYear([MesInicio])),
+					type text
+				)
+			in
+				ComTrimestre
