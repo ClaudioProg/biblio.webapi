@@ -10,13 +10,53 @@ from gestor.domain.entities.tipo_obra import TipoObra
 from gestor.domain.entities.genero import Genero  # necessário porque o Livro usa "genero" (FK)
 from gestor.domain.entities.usuario import Usuario
 from gestor.domain.entities.emprestimo import Emprestimo
+from gestor.infrastructure.territory_service import (
+    is_valid_neighborhood_code,
+    neighborhood_name_by_code,
+)
 
 
 # ============== Unidades ==============
 class UnidadeSerializer(serializers.ModelSerializer):
+    ibge_bairro_nome = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Unidade
-        fields = ["id", "nome", "endereco", "telefone", "email", "site"]
+        fields = [
+            "id",
+            "nome",
+            "endereco",
+            "telefone",
+            "email",
+            "site",
+            "ibge_bairro_codigo",
+            "ibge_bairro_nome",
+            "latitude",
+            "longitude",
+        ]
+
+    def get_ibge_bairro_nome(self, obj):
+        return neighborhood_name_by_code(obj.ibge_bairro_codigo)
+
+    def validate_ibge_bairro_codigo(self, value):
+        code = str(value or "").strip()
+        if not code:
+            return None
+        if not is_valid_neighborhood_code(code):
+            raise serializers.ValidationError(
+                "Código de bairro inválido para o recorte oficial de Santos/IBGE."
+            )
+        return code
+
+    def validate_latitude(self, value):
+        if value is not None and not (-90 <= value <= 90):
+            raise serializers.ValidationError("Latitude inválida.")
+        return value
+
+    def validate_longitude(self, value):
+        if value is not None and not (-180 <= value <= 180):
+            raise serializers.ValidationError("Longitude inválida.")
+        return value
 
 
 class UsuarioSerializer(serializers.ModelSerializer):
