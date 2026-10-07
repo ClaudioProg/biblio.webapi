@@ -33,6 +33,7 @@ from gestor.infrastructure.external_book_services import (
     IsbnNotFoundError,
 )
 from gestor.infrastructure.translation_service import TranslationService
+from gestor.infrastructure.territory_service import territory_payload
 
 # =========================================================
 # Autenticação da equipe gestora
@@ -504,6 +505,32 @@ def analytics_resumo(_request):
             for row in por_unidade
         ],
     })
+
+
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            "codigo",
+            OpenApiTypes.STR,
+            OpenApiParameter.QUERY,
+            description="Código IBGE exato do bairro.",
+        ),
+        OpenApiParameter(
+            "bairro",
+            OpenApiTypes.STR,
+            OpenApiParameter.QUERY,
+            description="Busca parcial pelo nome do bairro.",
+        ),
+    ],
+    responses={200: OpenApiTypes.OBJECT},
+)
+@api_view(["GET"])
+def analytics_territorio(request):
+    payload = territory_payload(
+        neighborhood_code=(request.query_params.get("codigo") or "").strip(),
+        neighborhood_name=(request.query_params.get("bairro") or "").strip(),
+    )
+    return Response(payload)
 
 
 # ---------- Endpoint utilitário ----------
