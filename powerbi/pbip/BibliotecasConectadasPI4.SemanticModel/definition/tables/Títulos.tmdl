@@ -1,7 +1,7 @@
 /// Circulação histórica agregada por título e biblioteca, sem identificadores de leitores.
 table Títulos
 
-	measure 'Títulos com circulação' = DISTINCTCOUNT(Títulos['ID do Livro'])
+	measure 'Títulos com circulação' = DISTINCTCOUNT('Títulos'[ID do Livro])
 		formatString: #,##0
 
 	measure 'Empréstimos totais — títulos' = SUM(Títulos[Empréstimos Totais Base])
