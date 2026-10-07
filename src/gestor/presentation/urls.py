@@ -9,7 +9,6 @@ from gestor.presentation.views import (
     EmprestimoViewSet,
     dados_iniciais,
     isbn_lookup,
-    db_info,  # 👈 adiciona aqui
 )
 
 # ---------- Roteador padrão DRF ----------
@@ -24,6 +23,5 @@ router.register(r"emprestimos", EmprestimoViewSet, basename="emprestimo")
 urlpatterns = [
     path("dados-iniciais/", dados_iniciais, name="dados-iniciais"),
     path("livros/isbn-lookup/", isbn_lookup, name="isbn-lookup"),
-    path("debug/db-info/", db_info, name="db-info"),  # 👈 nova rota
     path("", include(router.urls)),
 ]
