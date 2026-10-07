@@ -1,0 +1,60 @@
+{
+  "project": "Bibliotecas Conectadas — PI4",
+  "reference_date": "2026-10-07",
+  "municipality": {
+    "name": "Santos",
+    "state": "SP",
+    "ibge_code": "3548500"
+  },
+  "territorial_strategy": {
+    "primary_level": "bairro",
+    "secondary_level": "setor_censitario",
+    "sample_minimum_level": "area_de_ponderacao"
+  },
+  "datasets": [
+    {
+      "id": "bairro_basico",
+      "topic": "base territorial e totais básicos",
+      "level": "bairro",
+      "url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/Agregados_por_Bairro_csv/Agregados_por_bairros_basico_BR_20260520.zip",
+      "official_update": "2026-05-20"
+    },
+    {
+      "id": "bairro_demografia",
+      "topic": "demografia",
+      "level": "bairro",
+      "url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/Agregados_por_Bairro_csv/Agregados_por_bairros_demografia_BR.zip"
+    },
+    {
+      "id": "bairro_alfabetizacao",
+      "topic": "alfabetização",
+      "level": "bairro",
+      "url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/Agregados_por_Bairro_csv/Agregados_por_bairros_alfabetizacao_BR.zip"
+    },
+    {
+      "id": "bairro_renda_responsavel",
+      "topic": "rendimento do responsável pelo domicílio",
+      "level": "bairro",
+      "url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios_Rendimento_do_Responsavel/Agregados_por_bairros_renda_responsavel_BR_20260508_csv.zip",
+      "official_update": "2026-05-08"
+    }
+  ],
+  "dictionaries": [
+    {
+      "id": "agregados_geral",
+      "url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios/dicionario_de_dados_agregados_por_setores_censitarios_20260520.xlsx",
+      "official_update": "2026-05-20"
+    },
+    {
+      "id": "renda_responsavel",
+      "url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Agregados_por_Setores_Censitarios_Rendimento_do_Responsavel/dicionario_de_dados_renda_responsavel_20260508.xlsx",
+      "official_update": "2026-05-08"
+    }
+  ],
+  "rules": {
+    "suppressed_values": ["x", "X"],
+    "suppressed_values_are_zero": false,
+    "reader_personal_data_allowed": false,
+    "sociodemographic_data_imply_literary_preference": false
+  }
+}
