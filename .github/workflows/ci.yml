@@ -56,8 +56,9 @@ jobs:
 
       - name: Django tests
         run: |
-          if find . -type f \( -name "tests.py" -o -path "*/tests/*" \) | grep -q .; then
-            python manage.py test
+          if find src/gestor/tests -type f -name "test_*.py" | grep -q .; then
+            python manage.py test gestor.tests.test_api --verbosity 2
           else
-            echo "Sem testes encontrados, ok."
+            echo "ERRO: suíte de testes esperada não foi encontrada."
+            exit 1
           fi

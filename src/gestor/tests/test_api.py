@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
@@ -404,11 +406,64 @@ class GestorApiRegressionTests(APITestCase):
 
         serialized = str(response.data)
         self.assertNotIn(usuario.email, serialized)
-        self.assertNotIn(usuario.documento or "", serialized)
+        if usuario.documento:
+            self.assertNotIn(usuario.documento, serialized)
 
     def test_analytics_requires_authentication(self):
         public_client = APIClient()
         response = public_client.get("/gestor/analytics/resumo/")
+        self.assertEqual(response.status_code, 401)
+
+    @patch("gestor.presentation.views.TranslationService.translate_book_payload")
+    @patch("gestor.presentation.views.OpenLibraryLookupService.lookup")
+    def test_isbn_lookup_returns_book_metadata(
+        self,
+        lookup_mock,
+        translate_mock,
+    ):
+        payload = {
+            "isbn": "9780140328721",
+            "titulo": "Fantastic Mr. Fox",
+            "autor": "Roald Dahl",
+            "editora": "Puffin",
+            "data_publicacao": "1988-01-01",
+            "paginas": 96,
+            "capa": "https://covers.openlibrary.org/example.jpg",
+            "idioma": "English",
+            "source": "openlibrary",
+        }
+        lookup_mock.return_value = payload
+        translate_mock.return_value = (
+            payload,
+            {
+                "provider": "none",
+                "translated_fields": [],
+                "warnings": [],
+            },
+        )
+
+        response = self.client.get(
+            "/gestor/livros/isbn-lookup/?isbn=978-0-14-032872-1"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["data"]["isbn"], "9780140328721")
+        self.assertEqual(response.data["data"]["titulo"], "Fantastic Mr. Fox")
+        self.assertEqual(response.data["data"]["autor"], "Roald Dahl")
+        lookup_mock.assert_called_once_with("978-0-14-032872-1")
+
+    def test_isbn_lookup_rejects_invalid_isbn_without_external_request(self):
+        response = self.client.get(
+            "/gestor/livros/isbn-lookup/?isbn=1234567890123"
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("ISBN inválido", response.data["detail"])
+
+    def test_isbn_lookup_requires_authentication(self):
+        public_client = APIClient()
+        response = public_client.get(
+            "/gestor/livros/isbn-lookup/?isbn=9780140328721"
+        )
         self.assertEqual(response.status_code, 401)
 
     def test_database_debug_endpoint_is_not_exposed(self):
