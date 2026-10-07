@@ -7,6 +7,9 @@ from gestor.presentation.views import (
     LivroUnidadeViewSet,
     UsuarioViewSet,
     EmprestimoViewSet,
+    auth_login,
+    auth_logout,
+    auth_me,
     dados_iniciais,
     isbn_lookup,
 )
@@ -21,6 +24,9 @@ router.register(r"emprestimos", EmprestimoViewSet, basename="emprestimo")
 
 # ---------- URLs principais ----------
 urlpatterns = [
+    path("auth/login/", auth_login, name="auth-login"),
+    path("auth/logout/", auth_logout, name="auth-logout"),
+    path("auth/me/", auth_me, name="auth-me"),
     path("dados-iniciais/", dados_iniciais, name="dados-iniciais"),
     path("livros/isbn-lookup/", isbn_lookup, name="isbn-lookup"),
     path("", include(router.urls)),
