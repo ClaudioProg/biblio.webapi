@@ -1,0 +1,96 @@
+/// Estoque agregado por biblioteca, gênero e tipo de obra.
+table Acervo
+
+	measure Títulos = SUM(Acervo[Títulos Base])
+		formatString: #,##0
+
+	measure Exemplares = SUM(Acervo[Exemplares Base])
+		formatString: #,##0
+
+	measure 'Empréstimos abertos' = SUM(Acervo[Empréstimos Abertos Base])
+		formatString: #,##0
+
+	measure 'Exemplares disponíveis' = SUM(Acervo[Exemplares Disponíveis Base])
+		formatString: #,##0
+
+	measure 'Disponibilidade %' = DIVIDE([Exemplares disponíveis], [Exemplares])
+		formatString: 0.00%
+
+	column 'ID da Unidade'
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: unidade_id
+
+	column 'Código do Bairro'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: ibge_bairro_codigo
+
+	column Gênero
+		dataType: string
+		summarizeBy: none
+		sourceColumn: genero
+
+	column 'Tipo de Obra'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: tipo_obra
+
+	column 'Títulos Base'
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: titulos
+
+	column 'Exemplares Base'
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: exemplares
+
+	column 'Empréstimos Abertos Base'
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: emprestimos_abertos
+
+	column 'Exemplares Disponíveis Base'
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: exemplares_disponiveis
+
+	partition Acervo = m
+		mode: import
+		source =
+			let
+				Fonte = Json.Document(
+					Web.Contents(
+						"https://biblio-webapi.onrender.com",
+						[
+							RelativePath = "gestor/analytics/powerbi/",
+							Headers = [Accept = "application/json"],
+							Timeout = #duration(0, 0, 2, 0)
+						]
+					)
+				),
+				Registros = Fonte[fato_acervo],
+				Tabela = Table.FromRecords(Registros),
+				Tipos = Table.TransformColumnTypes(
+					Tabela,
+					{
+						{"unidade_id", Int64.Type},
+						{"ibge_bairro_codigo", type text},
+						{"genero", type text},
+						{"tipo_obra", type text},
+						{"titulos", Int64.Type},
+						{"exemplares", Int64.Type},
+						{"emprestimos_abertos", Int64.Type},
+						{"exemplares_disponiveis", Int64.Type}
+					},
+					"pt-BR"
+				)
+			in
+				Tipos
