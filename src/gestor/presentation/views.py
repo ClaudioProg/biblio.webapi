@@ -8,7 +8,12 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import viewsets, filters, permissions, status
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.authentication import BasicAuthentication, TokenAuthentication
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
@@ -540,6 +545,7 @@ def analytics_resumo(_request):
     responses={200: OpenApiTypes.OBJECT},
 )
 @api_view(["GET"])
+@authentication_classes([BasicAuthentication, TokenAuthentication])
 def analytics_powerbi(_request):
     return Response(build_powerbi_dataset())
 
