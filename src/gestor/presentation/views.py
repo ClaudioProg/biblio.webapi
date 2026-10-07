@@ -6,7 +6,6 @@ from rest_framework import viewsets, filters, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
-from django.db import connection
 
 from gestor.domain.entities.livro import Livro
 from gestor.domain.entities.unidade import Unidade
@@ -264,17 +263,6 @@ def dados_iniciais(_request):
         "tipo_obras": list(tipos),
     })
 
-
-# --- DEBUG: Info do banco em uso ---
-@api_view(["GET"])
-def db_info(_request):
-    cfg = connection.settings_dict
-    return Response({
-        "vendor": connection.vendor,
-        "name": cfg.get("NAME"),
-        "user": cfg.get("USER"),
-        "host": cfg.get("HOST"),
-    })
 
 
 @extend_schema(
