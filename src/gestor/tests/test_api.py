@@ -276,6 +276,67 @@ class GestorApiRegressionTests(APITestCase):
             1,
         )
 
+    def test_loan_create_uses_row_lock_for_stock_capacity(self):
+        livro = self._livro(isbn="9780000000015", exemplares=1)
+        usuario = self._usuario("lock")
+
+        with patch.object(
+            LivroUnidade.objects,
+            "select_for_update",
+            wraps=LivroUnidade.objects.select_for_update,
+        ) as lock_mock:
+            response = self.client.post(
+                "/gestor/emprestimos/",
+                {
+                    "livro": livro.id,
+                    "unidade": self.unidade_a.id,
+                    "usuario": usuario.id,
+                    "data_emprestimo": "2026-05-18",
+                    "status": "aberto",
+                },
+                format="json",
+            )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(lock_mock.called)
+
+    def test_returned_loan_cannot_reopen_when_last_copy_is_occupied(self):
+        livro = self._livro(isbn="9780000000016", exemplares=1)
+        usuario_a = self._usuario("reopen-a")
+        usuario_b = self._usuario("reopen-b")
+
+        Emprestimo.objects.create(
+            livro=livro,
+            unidade=self.unidade_a,
+            usuario=usuario_a,
+            data_emprestimo="2026-05-01",
+            data_devolucao="2026-05-10",
+            status=Emprestimo.STATUS_DEVOLVIDO,
+        )
+        aberto = Emprestimo.objects.create(
+            livro=livro,
+            unidade=self.unidade_a,
+            usuario=usuario_b,
+            data_emprestimo="2026-05-18",
+            status=Emprestimo.STATUS_ABERTO,
+        )
+        devolvido = Emprestimo.objects.get(usuario=usuario_a)
+
+        response = self.client.patch(
+            f"/gestor/emprestimos/{devolvido.id}/",
+            {
+                "status": Emprestimo.STATUS_ABERTO,
+                "data_devolucao": None,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        devolvido.refresh_from_db()
+        aberto.refresh_from_db()
+        self.assertEqual(devolvido.status, Emprestimo.STATUS_DEVOLVIDO)
+        self.assertEqual(aberto.status, Emprestimo.STATUS_ABERTO)
+
     def test_devolucao_requires_date(self):
         livro = self._livro(isbn="9780000000005", exemplares=1)
         usuario = self._usuario("c")

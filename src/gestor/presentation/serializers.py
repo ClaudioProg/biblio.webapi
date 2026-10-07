@@ -92,6 +92,45 @@ class EmprestimoSerializer(serializers.ModelSerializer):
             "observacoes",
         ]
 
+    def _lock_and_check_capacity(self, livro, unidade, status, exclude_pk=None):
+        """
+        Serializa alterações que consomem disponibilidade do mesmo livro/unidade.
+
+        O select_for_update precisa ocorrer dentro de transaction.atomic. Assim,
+        dois empréstimos simultâneos do último exemplar não podem ambos passar
+        pela contagem antes da gravação do primeiro.
+        """
+        if status != Emprestimo.STATUS_ABERTO:
+            return
+
+        livro_unidade = (
+            LivroUnidade.objects.select_for_update()
+            .filter(livro=livro, unidade=unidade)
+            .first()
+        )
+        if not livro_unidade or livro_unidade.exemplares <= 0:
+            raise serializers.ValidationError({
+                "unidade": (
+                    "Este livro não possui exemplares disponíveis na unidade selecionada."
+                )
+            })
+
+        emprestimos_abertos = Emprestimo.objects.filter(
+            livro=livro,
+            unidade=unidade,
+            status=Emprestimo.STATUS_ABERTO,
+        )
+        if exclude_pk:
+            emprestimos_abertos = emprestimos_abertos.exclude(pk=exclude_pk)
+
+        if emprestimos_abertos.count() >= livro_unidade.exemplares:
+            raise serializers.ValidationError({
+                "livro": (
+                    "Sem disponibilidade deste livro na unidade selecionada "
+                    "para novo empréstimo."
+                )
+            })
+
     def validate_data_emprestimo(self, value):
         """Validar que data de empréstimo não é futura."""
         if value and value > timezone.localdate():
@@ -174,6 +213,27 @@ class EmprestimoSerializer(serializers.ModelSerializer):
             attrs["status"] = Emprestimo.STATUS_DEVOLVIDO
 
         return attrs
+
+    @transaction.atomic
+    def create(self, validated_data):
+        livro = validated_data["livro"]
+        unidade = validated_data["unidade"]
+        status = validated_data.get("status", Emprestimo.STATUS_ABERTO)
+        self._lock_and_check_capacity(livro, unidade, status)
+        return super().create(validated_data)
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        livro = validated_data.get("livro", instance.livro)
+        unidade = validated_data.get("unidade", instance.unidade)
+        status = validated_data.get("status", instance.status)
+        self._lock_and_check_capacity(
+            livro,
+            unidade,
+            status,
+            exclude_pk=instance.pk,
+        )
+        return super().update(instance, validated_data)
 
 
 # ============== LivroUnidade (write / read) ==============
