@@ -87,6 +87,33 @@ class GestorApiRegressionTests(APITestCase):
         self.assertEqual(response.status_code, 204)
         self.assertFalse(Token.objects.filter(key=self.token.key).exists())
 
+    def test_authenticated_user_can_change_password(self):
+        response = self.client.post(
+            "/gestor/auth/change-password/",
+            {
+                "current_password": "SenhaForte123!",
+                "new_password": "NovaSenhaForte456!",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data.get("token"))
+        self.auth_user.refresh_from_db()
+        self.assertTrue(self.auth_user.check_password("NovaSenhaForte456!"))
+        self.assertFalse(Token.objects.filter(key=self.token.key).exists())
+
+    def test_change_password_rejects_wrong_current_password(self):
+        response = self.client.post(
+            "/gestor/auth/change-password/",
+            {
+                "current_password": "senha-errada",
+                "new_password": "NovaSenhaForte456!",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("current_password", response.data)
+
     def test_unidade_crud_persists_through_api(self):
         create = self.client.post(
             "/gestor/unidades/",
