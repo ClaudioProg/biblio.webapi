@@ -219,3 +219,214 @@ class OpenLibraryLookupService:
             return f"{year_match.group(1)}-01-01"
 
         return ""
+
+
+def _isbn10_to_isbn13(isbn10: str) -> str | None:
+    normalized = normalize_isbn(isbn10)
+    if len(normalized) != 10:
+        return None
+
+    base = "978" + normalized[:9]
+    total = sum(
+        int(char) * (1 if index % 2 == 0 else 3)
+        for index, char in enumerate(base)
+    )
+    check = (10 - (total % 10)) % 10
+    return f"{base}{check}"
+
+
+def _isbn13_to_isbn10(isbn13: str) -> str | None:
+    normalized = normalize_isbn(isbn13)
+    if len(normalized) != 13 or not normalized.startswith("978"):
+        return None
+
+    base = normalized[3:12]
+    total = sum(int(char) * (10 - index) for index, char in enumerate(base))
+    remainder = total % 11
+    check_value = (11 - remainder) % 11
+    check = "X" if check_value == 10 else str(check_value)
+    candidate = f"{base}{check}"
+    return candidate if _is_valid_isbn10(candidate) else None
+
+
+def isbn_equivalents(isbn: str) -> set[str]:
+    normalized = normalize_isbn(isbn)
+    values = {normalized}
+
+    if len(normalized) == 10:
+        converted = _isbn10_to_isbn13(normalized)
+        if converted:
+            values.add(converted)
+    elif len(normalized) == 13:
+        converted = _isbn13_to_isbn10(normalized)
+        if converted:
+            values.add(converted)
+
+    return values
+
+
+class GoogleBooksLookupService:
+    def __init__(self):
+        self.base_url = settings.GOOGLE_BOOKS_BASE_URL.rstrip("/")
+        self.timeout = settings.GOOGLE_BOOKS_TIMEOUT_SECONDS
+        self.api_key = settings.GOOGLE_BOOKS_API_KEY
+
+    def lookup(self, isbn: str) -> dict:
+        normalized_isbn = normalize_isbn(isbn)
+        params = {
+            "q": f"isbn:{normalized_isbn}",
+            "maxResults": 5,
+            "printType": "books",
+            "projection": "full",
+        }
+        if self.api_key:
+            params["key"] = self.api_key
+
+        url = f"{self.base_url}/volumes?{urlencode(params)}"
+        data = self._request_json(url)
+        item = self._find_exact_item(normalized_isbn, data)
+
+        if not item:
+            raise IsbnNotFoundError("ISBN não encontrado no Google Books.")
+
+        payload = self._map_to_payload(normalized_isbn, item)
+        if not payload.get("titulo") and not payload.get("autor"):
+            raise IsbnNotFoundError("ISBN não encontrado no Google Books.")
+        return payload
+
+    def _request_json(self, url: str) -> dict:
+        request = Request(
+            url=url,
+            method="GET",
+            headers={
+                "Accept": "application/json",
+                "User-Agent": settings.OPENLIBRARY_USER_AGENT,
+            },
+        )
+        try:
+            with urlopen(request, timeout=self.timeout) as response:
+                body = response.read().decode("utf-8")
+                return json.loads(body) if body else {}
+        except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
+            raise ExternalServiceError("Falha ao consultar Google Books.") from exc
+
+    def _find_exact_item(self, isbn: str, data: dict) -> dict:
+        expected = isbn_equivalents(isbn)
+        items = data.get("items", []) if isinstance(data, dict) else []
+
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            volume = item.get("volumeInfo", {})
+            identifiers = volume.get("industryIdentifiers", [])
+            found = set()
+
+            for identifier in identifiers:
+                if not isinstance(identifier, dict):
+                    continue
+                raw = identifier.get("identifier")
+                if not raw:
+                    continue
+                try:
+                    found.add(normalize_isbn(str(raw)))
+                except InvalidIsbnError:
+                    continue
+
+            if expected & found:
+                return item
+
+        return {}
+
+    def _map_to_payload(self, isbn: str, item: dict) -> dict:
+        volume = item.get("volumeInfo", {}) if isinstance(item, dict) else {}
+        authors = volume.get("authors", [])
+        author = ", ".join(
+            str(name).strip()
+            for name in authors
+            if str(name).strip()
+        ) if isinstance(authors, list) else ""
+
+        image_links = volume.get("imageLinks", {})
+        cover = ""
+        if isinstance(image_links, dict):
+            cover = (
+                image_links.get("extraLarge")
+                or image_links.get("large")
+                or image_links.get("medium")
+                or image_links.get("small")
+                or image_links.get("thumbnail")
+                or image_links.get("smallThumbnail")
+                or ""
+            )
+            if cover.startswith("http://"):
+                cover = "https://" + cover[len("http://"):]
+
+        language_map = {
+            "pt": "Portuguese",
+            "en": "English",
+            "es": "Spanish",
+            "fr": "French",
+            "de": "German",
+            "it": "Italian",
+        }
+        language = str(volume.get("language") or "").strip()
+
+        return {
+            "isbn": isbn,
+            "titulo": str(volume.get("title") or "").strip(),
+            "autor": author,
+            "editora": str(volume.get("publisher") or "").strip(),
+            "data_publicacao": self._normalize_date(volume.get("publishedDate")),
+            "paginas": volume.get("pageCount") or None,
+            "capa": cover,
+            "idioma": language_map.get(language, language),
+            "source": "googlebooks",
+        }
+
+    def _normalize_date(self, publish_date):
+        if not publish_date:
+            return ""
+
+        text = str(publish_date).strip()
+        for date_format in ("%Y-%m-%d", "%Y-%m", "%Y/%m/%d"):
+            try:
+                parsed = datetime.strptime(text, date_format)
+                if date_format == "%Y-%m":
+                    return parsed.strftime("%Y-%m-01")
+                return parsed.strftime("%Y-%m-%d")
+            except ValueError:
+                continue
+
+        year_match = re.search(r"\b(\d{4})\b", text)
+        if year_match:
+            return f"{year_match.group(1)}-01-01"
+        return ""
+
+
+class BookMetadataLookupService:
+    def __init__(self):
+        self.providers = [
+            OpenLibraryLookupService(),
+            GoogleBooksLookupService(),
+        ]
+
+    def lookup(self, isbn: str) -> dict:
+        normalized_isbn = normalize_isbn(isbn)
+        external_errors = []
+
+        for provider in self.providers:
+            try:
+                return provider.lookup(normalized_isbn)
+            except IsbnNotFoundError:
+                continue
+            except ExternalServiceError as exc:
+                external_errors.append(exc)
+
+        if external_errors:
+            raise ExternalServiceError(
+                "Não foi possível concluir a consulta nas bases bibliográficas agora."
+            )
+
+        raise IsbnNotFoundError(
+            "ISBN não encontrado nas bases bibliográficas consultadas."
+        )

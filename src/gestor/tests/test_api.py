@@ -13,6 +13,12 @@ from gestor.domain.entities.livro import Livro
 from gestor.domain.entities.livro_unidade import LivroUnidade
 from gestor.domain.entities.usuario import Usuario
 from gestor.domain.entities.emprestimo import Emprestimo
+from gestor.infrastructure.external_book_services import (
+    BookMetadataLookupService,
+    GoogleBooksLookupService,
+    IsbnNotFoundError,
+    isbn_equivalents,
+)
 
 
 class GestorApiRegressionTests(APITestCase):
@@ -719,8 +725,91 @@ class GestorApiRegressionTests(APITestCase):
         self.assertFalse(response.data["meta"]["contem_dados_pessoais"])
         self.assertEqual(len(response.data["dim_bairro"]), 70)
 
+    def test_isbn_equivalents_convert_between_isbn10_and_isbn13(self):
+        self.assertEqual(
+            isbn_equivalents("8587600826"),
+            {"8587600826", "9788587600820"},
+        )
+        self.assertEqual(
+            isbn_equivalents("9788587600820"),
+            {"8587600826", "9788587600820"},
+        )
+
+    def test_google_books_requires_exact_identifier_match(self):
+        service = GoogleBooksLookupService()
+        item = {
+            "volumeInfo": {
+                "title": "Fundamentos em Infectologia",
+                "authors": [
+                    "Manoel Otávio da Costa Rocha",
+                    "Enio Roberto Pietra Pedroso",
+                ],
+                "publisher": "Rubio",
+                "publishedDate": "2009",
+                "pageCount": 1120,
+                "language": "pt",
+                "industryIdentifiers": [
+                    {"type": "ISBN_10", "identifier": "8587600826"},
+                    {"type": "ISBN_13", "identifier": "9788587600820"},
+                ],
+            }
+        }
+
+        found = service._find_exact_item(
+            "9788587600820",
+            {"items": [item]},
+        )
+        self.assertEqual(found, item)
+
+    def test_google_books_maps_real_fallback_payload(self):
+        service = GoogleBooksLookupService()
+        item = {
+            "volumeInfo": {
+                "title": "Etnografias em Serviços de Saúde",
+                "authors": ["Jaqueline Ferreira", "Soraya Fleischer"],
+                "publisher": "Garamond",
+                "publishedDate": "2014",
+                "pageCount": 360,
+                "language": "pt",
+                "industryIdentifiers": [
+                    {"type": "ISBN_13", "identifier": "9788576173755"},
+                ],
+            }
+        }
+
+        payload = service._map_to_payload("9788576173755", item)
+        self.assertEqual(payload["titulo"], "Etnografias em Serviços de Saúde")
+        self.assertEqual(payload["autor"], "Jaqueline Ferreira, Soraya Fleischer")
+        self.assertEqual(payload["editora"], "Garamond")
+        self.assertEqual(payload["data_publicacao"], "2014-01-01")
+        self.assertEqual(payload["paginas"], 360)
+        self.assertEqual(payload["idioma"], "Portuguese")
+        self.assertEqual(payload["source"], "googlebooks")
+
+    def test_book_metadata_lookup_falls_back_after_openlibrary_miss(self):
+        service = BookMetadataLookupService()
+        expected = {
+            "isbn": "9788576173755",
+            "titulo": "Etnografias em Serviços de Saúde",
+            "autor": "Jaqueline Ferreira, Soraya Fleischer",
+            "source": "googlebooks",
+        }
+
+        with patch.object(
+            service.providers[0],
+            "lookup",
+            side_effect=IsbnNotFoundError("não encontrado"),
+        ), patch.object(
+            service.providers[1],
+            "lookup",
+            return_value=expected,
+        ):
+            result = service.lookup("9788576173755")
+
+        self.assertEqual(result, expected)
+
     @patch("gestor.presentation.views.TranslationService.translate_book_payload")
-    @patch("gestor.presentation.views.OpenLibraryLookupService.lookup")
+    @patch("gestor.presentation.views.BookMetadataLookupService.lookup")
     def test_isbn_lookup_returns_book_metadata(
         self,
         lookup_mock,
