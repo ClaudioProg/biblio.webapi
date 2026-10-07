@@ -1,0 +1,109 @@
+/// Circulação histórica agregada por título e biblioteca, sem identificadores de leitores.
+table Títulos
+
+	measure 'Títulos com circulação' = DISTINCTCOUNT(Títulos['ID do Livro'])
+		formatString: #,##0
+
+	measure 'Empréstimos totais — títulos' = SUM(Títulos[Empréstimos Totais Base])
+		formatString: #,##0
+
+	column 'ID da Unidade'
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: unidade_id
+
+	column 'Código do Bairro'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: ibge_bairro_codigo
+
+	column 'ID do Livro'
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: livro_id
+
+	column Título
+		dataType: string
+		summarizeBy: none
+		sourceColumn: titulo
+
+	column Autor
+		dataType: string
+		summarizeBy: none
+		sourceColumn: autor
+
+	column ISBN
+		dataType: string
+		summarizeBy: none
+		sourceColumn: isbn
+
+	column Gênero
+		dataType: string
+		summarizeBy: none
+		sourceColumn: genero
+
+	column 'Tipo de Obra'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: tipo_obra
+
+	column 'Empréstimos Totais Base'
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: emprestimos_total
+
+	column 'Empréstimos Abertos'
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: emprestimos_abertos
+
+	column 'Exemplares Atuais'
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: exemplares_atuais
+
+	column 'Exemplares Disponíveis'
+		dataType: int64
+		summarizeBy: sum
+		sourceColumn: exemplares_disponiveis
+
+	partition Títulos = m
+		mode: import
+		source =
+			let
+				Fonte = Json.Document(
+					Web.Contents(
+						"https://biblio-webapi.onrender.com",
+						[
+							RelativePath = "gestor/analytics/powerbi/",
+							Headers = [Accept = "application/json"],
+							Timeout = #duration(0, 0, 2, 0)
+						]
+					)
+				),
+				Registros = Fonte[fato_titulos],
+				Tabela = Table.FromRecords(Registros),
+				Tipos = Table.TransformColumnTypes(
+					Tabela,
+					{
+						{"unidade_id", Int64.Type},
+						{"ibge_bairro_codigo", type text},
+						{"livro_id", Int64.Type},
+						{"titulo", type text},
+						{"autor", type text},
+						{"isbn", type text},
+						{"genero", type text},
+						{"tipo_obra", type text},
+						{"emprestimos_total", Int64.Type},
+						{"emprestimos_abertos", Int64.Type},
+						{"exemplares_atuais", Int64.Type},
+						{"exemplares_disponiveis", Int64.Type}
+					},
+					"pt-BR"
+				)
+			in
+				Tipos
