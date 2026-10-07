@@ -230,6 +230,90 @@ class GestorApiRegressionTests(APITestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("data_devolucao", response.data)
 
+    def test_entities_with_loan_history_cannot_be_deleted(self):
+        livro = self._livro(isbn="9780000000006", exemplares=1)
+        usuario = self._usuario("d")
+        emprestimo = Emprestimo.objects.create(
+            livro=livro,
+            unidade=self.unidade_a,
+            usuario=usuario,
+            data_emprestimo="2026-05-18",
+            data_prevista_devolucao="2026-06-01",
+            status=Emprestimo.STATUS_ABERTO,
+        )
+
+        for endpoint in (
+            f"/gestor/livros/{livro.id}/",
+            f"/gestor/unidades/{self.unidade_a.id}/",
+            f"/gestor/usuarios/{usuario.id}/",
+        ):
+            response = self.client.delete(endpoint)
+            self.assertEqual(response.status_code, 409)
+
+        self.assertTrue(Livro.objects.filter(pk=livro.id).exists())
+        self.assertTrue(Unidade.objects.filter(pk=self.unidade_a.id).exists())
+        self.assertTrue(Usuario.objects.filter(pk=usuario.id).exists())
+        self.assertTrue(Emprestimo.objects.filter(pk=emprestimo.id).exists())
+
+    def test_emprestimo_history_cannot_be_hard_deleted(self):
+        livro = self._livro(isbn="9780000000007", exemplares=1)
+        usuario = self._usuario("e")
+        emprestimo = Emprestimo.objects.create(
+            livro=livro,
+            unidade=self.unidade_a,
+            usuario=usuario,
+            data_emprestimo="2026-05-18",
+            status=Emprestimo.STATUS_ABERTO,
+        )
+
+        response = self.client.delete(f"/gestor/emprestimos/{emprestimo.id}/")
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(Emprestimo.objects.filter(pk=emprestimo.id).exists())
+
+    def test_stock_cannot_be_reduced_below_open_loans(self):
+        livro = self._livro(isbn="9780000000008", exemplares=1)
+        usuario = self._usuario("f")
+        Emprestimo.objects.create(
+            livro=livro,
+            unidade=self.unidade_a,
+            usuario=usuario,
+            data_emprestimo="2026-05-18",
+            status=Emprestimo.STATUS_ABERTO,
+        )
+
+        response = self.client.patch(
+            f"/gestor/livros/{livro.id}/",
+            {"unidades": []},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            LivroUnidade.objects.get(livro=livro, unidade=self.unidade_a).exemplares,
+            1,
+        )
+
+    def test_book_library_link_cannot_be_removed_with_open_loan(self):
+        livro = self._livro(isbn="9780000000009", exemplares=1)
+        usuario = self._usuario("g")
+        Emprestimo.objects.create(
+            livro=livro,
+            unidade=self.unidade_a,
+            usuario=usuario,
+            data_emprestimo="2026-05-18",
+            status=Emprestimo.STATUS_ABERTO,
+        )
+        relation = LivroUnidade.objects.get(
+            livro=livro,
+            unidade=self.unidade_a,
+        )
+
+        response = self.client.delete(
+            f"/gestor/livro-unidades/{relation.id}/"
+        )
+        self.assertEqual(response.status_code, 409)
+        self.assertTrue(LivroUnidade.objects.filter(pk=relation.id).exists())
+
     def test_database_debug_endpoint_is_not_exposed(self):
         response = self.client.get("/gestor/debug/db-info/")
         self.assertEqual(response.status_code, 404)
