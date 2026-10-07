@@ -22,13 +22,15 @@ environ.Env.read_env(BASE_DIR / ".env")
 # =========================
 # Chaves / Flags
 # =========================
-SECRET_KEY = env(
-    "SECRET_KEY",
-    default="django-insecure-h!ds_!gx+#axo!pggb^chklwxc&7)uq^jo6de48*b-l#q^0(51",
-)
-
 # Produção como padrão (pode sobrescrever no .env)
 DEBUG = env.bool("DEBUG", default=False)
+
+SECRET_KEY = env("SECRET_KEY", default="")
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = "django-insecure-dev-only-change-me"
+    else:
+        raise RuntimeError("SECRET_KEY é obrigatória quando DEBUG=False.")
 
 ALLOWED_HOSTS = env.list(
     "ALLOWED_HOSTS",
@@ -243,7 +245,7 @@ CORS_ALLOWED_ORIGINS = env.list(
 
 # Permitir previews *.vercel.app (além do domínio principal)
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://.*\.vercel\.app$",
+    r"^https://bibliotecasconectadas(?:-.*)?\.vercel\.app$",
     r"^http://localhost:\d+$",
 ]
 
