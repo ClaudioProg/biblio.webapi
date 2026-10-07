@@ -1,0 +1,186 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "20000000000000000003",
+  "position": {
+    "x": 640,
+    "y": 140,
+    "z": 3000,
+    "height": 560,
+    "width": 620,
+    "tabOrder": 3000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "Bairro"
+                }
+              },
+              "queryRef": "Bairros.Bairro",
+              "nativeQueryRef": "Bairro"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "População Total"
+                }
+              },
+              "queryRef": "Bairros.População Total",
+              "nativeQueryRef": "População Total"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "Idade 0–14"
+                }
+              },
+              "queryRef": "Bairros.Idade 0–14",
+              "nativeQueryRef": "Idade 0–14"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "Idade 15–29"
+                }
+              },
+              "queryRef": "Bairros.Idade 15–29",
+              "nativeQueryRef": "Idade 15–29"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "Idade 30–59"
+                }
+              },
+              "queryRef": "Bairros.Idade 30–59",
+              "nativeQueryRef": "Idade 30–59"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "Idade 60+"
+                }
+              },
+              "queryRef": "Bairros.Idade 60+",
+              "nativeQueryRef": "Idade 60+"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "Taxa Alfabetização 15+"
+                }
+              },
+              "queryRef": "Bairros.Taxa Alfabetização 15+",
+              "nativeQueryRef": "Taxa Alfabetização 15+"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "Renda Mediana do Responsável"
+                }
+              },
+              "queryRef": "Bairros.Renda Mediana do Responsável",
+              "nativeQueryRef": "Renda Mediana do Responsável"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "columnAdjustment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'growToFit'"
+                }
+              }
+            },
+            "autoSizeColumnWidth": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Indicadores sociodemográficos por bairro'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
