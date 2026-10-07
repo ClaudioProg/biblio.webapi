@@ -314,6 +314,46 @@ class GestorApiRegressionTests(APITestCase):
         self.assertEqual(response.status_code, 409)
         self.assertTrue(LivroUnidade.objects.filter(pk=relation.id).exists())
 
+    def test_new_loan_rejects_inactive_user(self):
+        livro = self._livro(isbn="9780000000010", exemplares=1)
+        usuario = self._usuario("h")
+        usuario.ativo = False
+        usuario.save(update_fields=["ativo"])
+
+        response = self.client.post(
+            "/gestor/emprestimos/",
+            {
+                "livro": livro.id,
+                "unidade": self.unidade_a.id,
+                "usuario": usuario.id,
+                "data_emprestimo": "2026-05-18",
+                "status": "aberto",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("usuario", response.data)
+
+    def test_book_detail_exposes_current_availability(self):
+        livro = self._livro(isbn="9780000000011", exemplares=2)
+        usuario = self._usuario("i")
+        Emprestimo.objects.create(
+            livro=livro,
+            unidade=self.unidade_a,
+            usuario=usuario,
+            data_emprestimo="2026-05-18",
+            status=Emprestimo.STATUS_ABERTO,
+        )
+
+        response = self.client.get(f"/gestor/livros/{livro.id}/")
+
+        self.assertEqual(response.status_code, 200)
+        detalhe = response.data["unidades_detalhe"][0]
+        self.assertEqual(detalhe["exemplares"], 2)
+        self.assertEqual(detalhe["emprestimos_abertos"], 1)
+        self.assertEqual(detalhe["exemplares_disponiveis"], 1)
+
     def test_database_debug_endpoint_is_not_exposed(self):
         response = self.client.get("/gestor/debug/db-info/")
         self.assertEqual(response.status_code, 404)
