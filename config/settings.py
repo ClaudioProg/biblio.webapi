@@ -95,6 +95,7 @@ INSTALLED_APPS = [
 
     # APIs
     "rest_framework",
+    "rest_framework.authtoken",
     "drf_spectacular",
     "corsheaders",
 
@@ -204,9 +205,12 @@ else:
         ],
     }
 
-# 🔓 Permissões abertas temporariamente (sem autenticação real)
+# Autenticação por token para proteger cadastros e operações da biblioteca.
+REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = [
+    "rest_framework.authentication.TokenAuthentication"
+]
 REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
-    "rest_framework.permissions.AllowAny"
+    "rest_framework.permissions.IsAuthenticated"
 ]
 
 # 🔧 Sem paginação global -> lista vira array puro (evita {"results":[...]})
