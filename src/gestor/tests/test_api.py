@@ -1,5 +1,6 @@
-from django.urls import resolve
-from rest_framework.test import APITestCase
+from django.contrib.auth import get_user_model
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient, APITestCase
 
 from gestor.domain.entities.genero import Genero
 from gestor.domain.entities.tipo_obra import TipoObra
@@ -12,6 +13,16 @@ from gestor.domain.entities.emprestimo import Emprestimo
 
 class GestorApiRegressionTests(APITestCase):
     def setUp(self):
+        self.auth_user = get_user_model().objects.create_user(
+            username="gestor_teste",
+            password="SenhaForte123!",
+            first_name="Gestor",
+            last_name="Teste",
+            is_staff=True,
+        )
+        self.token = Token.objects.create(user=self.auth_user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.token.key}")
+
         self.genero = Genero.objects.create(nome="Ficção de teste")
         self.tipo = TipoObra.objects.create(nome="Livro de teste")
         self.unidade_a = Unidade.objects.create(
@@ -44,6 +55,37 @@ class GestorApiRegressionTests(APITestCase):
             email=f"usuario{suffix}@example.com",
             ativo=True,
         )
+
+    def test_private_endpoints_require_authentication(self):
+        public_client = APIClient()
+        response = public_client.get("/gestor/usuarios/")
+        self.assertEqual(response.status_code, 401)
+
+    def test_login_returns_real_api_token(self):
+        public_client = APIClient()
+        response = public_client.post(
+            "/gestor/auth/login/",
+            {"username": "gestor_teste", "password": "SenhaForte123!"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["token"], self.token.key)
+        self.assertEqual(response.data["user"]["username"], "gestor_teste")
+        self.assertEqual(response.data["user"]["role"], "staff")
+
+    def test_login_rejects_invalid_credentials(self):
+        public_client = APIClient()
+        response = public_client.post(
+            "/gestor/auth/login/",
+            {"username": "gestor_teste", "password": "senha-errada"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 401)
+
+    def test_logout_invalidates_token(self):
+        response = self.client.post("/gestor/auth/logout/", {}, format="json")
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(Token.objects.filter(key=self.token.key).exists())
 
     def test_unidade_crud_persists_through_api(self):
         create = self.client.post(
