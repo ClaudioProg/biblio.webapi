@@ -37,6 +37,7 @@ from gestor.infrastructure.territory_service import (
     neighborhood_name_by_code,
     territory_payload,
 )
+from gestor.infrastructure.powerbi_service import build_powerbi_dataset
 
 # =========================================================
 # Autenticação da equipe gestora
@@ -533,6 +534,14 @@ def analytics_resumo(_request):
             for row in por_unidade
         ],
     })
+
+
+@extend_schema(
+    responses={200: OpenApiTypes.OBJECT},
+)
+@api_view(["GET"])
+def analytics_powerbi(_request):
+    return Response(build_powerbi_dataset())
 
 
 @extend_schema(

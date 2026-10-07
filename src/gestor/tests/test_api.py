@@ -508,6 +508,75 @@ class GestorApiRegressionTests(APITestCase):
         response = public_client.get("/gestor/analytics/territorio/")
         self.assertEqual(response.status_code, 401)
 
+    def test_powerbi_dataset_is_normalized_and_contains_no_reader_pii(self):
+        self.unidade_a.ibge_bairro_codigo = "3548500005"
+        self.unidade_a.latitude = "-23.979587"
+        self.unidade_a.longitude = "-46.314403"
+        self.unidade_a.save(
+            update_fields=["ibge_bairro_codigo", "latitude", "longitude"]
+        )
+        livro = self._livro(isbn="9780000000014", exemplares=2)
+        usuario = self._usuario("powerbi")
+        usuario.documento = "12345678900"
+        usuario.save(update_fields=["documento"])
+
+        Emprestimo.objects.create(
+            livro=livro,
+            unidade=self.unidade_a,
+            usuario=usuario,
+            data_emprestimo="2026-05-18",
+            status=Emprestimo.STATUS_ABERTO,
+        )
+        Emprestimo.objects.create(
+            livro=livro,
+            unidade=self.unidade_a,
+            usuario=usuario,
+            data_emprestimo="2026-06-02",
+            data_devolucao="2026-06-10",
+            status=Emprestimo.STATUS_DEVOLVIDO,
+        )
+
+        response = self.client.get("/gestor/analytics/powerbi/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.data["meta"]["contem_dados_pessoais"])
+        self.assertEqual(len(response.data["dim_bairro"]), 70)
+
+        unidade = response.data["dim_unidade"][0]
+        self.assertEqual(unidade["ibge_bairro_codigo"], "3548500005")
+        self.assertEqual(unidade["ibge_bairro_nome"], "Aparecida")
+
+        acervo = response.data["fato_acervo"][0]
+        self.assertEqual(acervo["unidade_id"], self.unidade_a.id)
+        self.assertEqual(acervo["exemplares"], 2)
+
+        meses = {
+            row["mes"]: row["emprestimos_iniciados"]
+            for row in response.data["fato_circulacao_mensal"]
+        }
+        self.assertEqual(meses["2026-05-01"], 1)
+        self.assertEqual(meses["2026-06-01"], 1)
+
+        devolucoes = {
+            row["mes"]: row["devolucoes"]
+            for row in response.data["fato_devolucoes_mensal"]
+        }
+        self.assertEqual(devolucoes["2026-06-01"], 1)
+
+        titulo = response.data["fato_titulos"][0]
+        self.assertEqual(titulo["emprestimos_total"], 2)
+        self.assertEqual(titulo["emprestimos_abertos"], 1)
+        self.assertEqual(titulo["exemplares_disponiveis"], 1)
+
+        serialized = str(response.data)
+        self.assertNotIn(usuario.email, serialized)
+        self.assertNotIn(usuario.documento, serialized)
+
+    def test_powerbi_dataset_requires_authentication(self):
+        public_client = APIClient()
+        response = public_client.get("/gestor/analytics/powerbi/")
+        self.assertEqual(response.status_code, 401)
+
     @patch("gestor.presentation.views.TranslationService.translate_book_payload")
     @patch("gestor.presentation.views.OpenLibraryLookupService.lookup")
     def test_isbn_lookup_returns_book_metadata(
