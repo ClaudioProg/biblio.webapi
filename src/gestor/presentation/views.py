@@ -235,6 +235,27 @@ class LivroUnidadeViewSet(viewsets.ModelViewSet):
         s = self.get_serializer(qs, many=True)
         return Response(s.data)
 
+    def destroy(self, request, *args, **kwargs):
+        relation = self.get_object()
+        has_open_loans = Emprestimo.objects.filter(
+            livro=relation.livro,
+            unidade=relation.unidade,
+            status=Emprestimo.STATUS_ABERTO,
+        ).exists()
+
+        if has_open_loans:
+            return Response(
+                {
+                    "detail": (
+                        "O vínculo livro/unidade não pode ser removido enquanto "
+                        "houver empréstimos abertos nessa unidade."
+                    )
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        return super().destroy(request, *args, **kwargs)
+
 
 class LivroViewSet(ProtectLoanHistoryMixin, viewsets.ModelViewSet):
     """
