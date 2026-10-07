@@ -1,0 +1,14 @@
+model Model
+	culture: pt-BR
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: pt-BR
+	discourageImplicitMeasures
+
+ref table Bairros
+ref table Bibliotecas
+ref table Acervo
+ref table 'Circulação Mensal'
+ref table 'Devoluções Mensais'
+ref table Títulos
+ref table Calendário
+ref table 'Qualidade IBGE'
