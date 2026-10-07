@@ -11,6 +11,7 @@ from gestor.presentation.views import (
     auth_logout,
     auth_me,
     auth_change_password,
+    analytics_resumo,
     dados_iniciais,
     isbn_lookup,
 )
@@ -29,6 +30,7 @@ urlpatterns = [
     path("auth/logout/", auth_logout, name="auth-logout"),
     path("auth/me/", auth_me, name="auth-me"),
     path("auth/change-password/", auth_change_password, name="auth-change-password"),
+    path("analytics/resumo/", analytics_resumo, name="analytics-resumo"),
     path("dados-iniciais/", dados_iniciais, name="dados-iniciais"),
     path("livros/isbn-lookup/", isbn_lookup, name="isbn-lookup"),
     path("", include(router.urls)),
