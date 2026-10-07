@@ -3,7 +3,9 @@ from django.db.models import Q
 from django.db.models.deletion import ProtectedError
 from django.core.cache import cache
 from django.conf import settings
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, update_session_auth_hash
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import viewsets, filters, permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
@@ -82,6 +84,38 @@ def auth_me(request):
         "username": user.get_username(),
         "name": user.get_full_name() or user.get_username(),
         "role": role,
+    })
+
+
+@api_view(["POST"])
+def auth_change_password(request):
+    user = request.user
+    current_password = str(request.data.get("current_password") or "")
+    new_password = str(request.data.get("new_password") or "")
+
+    if not user.check_password(current_password):
+        return Response(
+            {"current_password": "Senha atual incorreta."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        validate_password(new_password, user=user)
+    except DjangoValidationError as exc:
+        return Response(
+            {"new_password": list(exc.messages)},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user.set_password(new_password)
+    user.save(update_fields=["password"])
+
+    Token.objects.filter(user=user).delete()
+    token = Token.objects.create(user=user)
+
+    return Response({
+        "detail": "Senha alterada com sucesso.",
+        "token": token.key,
     })
 
 
