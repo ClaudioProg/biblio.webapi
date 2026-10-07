@@ -214,6 +214,14 @@ REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = [
 REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
     "rest_framework.permissions.IsAuthenticated"
 ]
+REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = [
+    "rest_framework.throttling.AnonRateThrottle",
+    "rest_framework.throttling.UserRateThrottle",
+]
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
+    "anon": "20/min",
+    "user": "300/min",
+}
 
 # 🔧 Sem paginação global -> lista vira array puro (evita {"results":[...]})
 REST_FRAMEWORK["DEFAULT_PAGINATION_CLASS"] = None
