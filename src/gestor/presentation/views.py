@@ -2,8 +2,10 @@
 from django.db.models import Q
 from django.core.cache import cache
 from django.conf import settings
-from rest_framework import viewsets, filters, permissions
-from rest_framework.decorators import api_view
+from django.contrib.auth import authenticate
+from rest_framework import viewsets, filters, permissions, status
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
@@ -30,13 +32,66 @@ from gestor.infrastructure.external_book_services import (
 from gestor.infrastructure.translation_service import TranslationService
 
 # =========================================================
-# ViewSets sem paginação (array puro) e com acesso liberado
+# Autenticação da equipe gestora
+# =========================================================
+
+@api_view(["POST"])
+@permission_classes([permissions.AllowAny])
+def auth_login(request):
+    username = str(request.data.get("username") or "").strip()
+    password = str(request.data.get("password") or "")
+
+    if not username or not password:
+        return Response(
+            {"detail": "Informe usuário e senha."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user = authenticate(request=request, username=username, password=password)
+    if user is None or not user.is_active:
+        return Response(
+            {"detail": "Credenciais inválidas."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    token, _ = Token.objects.get_or_create(user=user)
+    role = "admin" if user.is_superuser else ("staff" if user.is_staff else "usuario")
+
+    return Response({
+        "token": token.key,
+        "user": {
+            "username": user.get_username(),
+            "name": user.get_full_name() or user.get_username(),
+            "role": role,
+        },
+    })
+
+
+@api_view(["POST"])
+def auth_logout(request):
+    Token.objects.filter(user=request.user).delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(["GET"])
+def auth_me(request):
+    user = request.user
+    role = "admin" if user.is_superuser else ("staff" if user.is_staff else "usuario")
+    return Response({
+        "username": user.get_username(),
+        "name": user.get_full_name() or user.get_username(),
+        "role": role,
+    })
+
+
+# =========================================================
+# ViewSets sem paginação (array puro) e autenticados
 # =========================================================
 
 class UnidadeViewSet(viewsets.ModelViewSet):
     queryset = Unidade.objects.all().order_by("id")
     serializer_class = UnidadeSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -53,7 +108,7 @@ class UnidadeViewSet(viewsets.ModelViewSet):
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all().order_by("id")
     serializer_class = UsuarioSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -82,7 +137,7 @@ class EmprestimoViewSet(viewsets.ModelViewSet):
         .order_by("-data_emprestimo", "-id")
     )
     serializer_class = EmprestimoSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -125,7 +180,7 @@ class LivroUnidadeViewSet(viewsets.ModelViewSet):
         .order_by("id")
     )
     serializer_class = LivroUnidadeSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
 
     filter_backends = [filters.OrderingFilter]
@@ -159,7 +214,7 @@ class LivroViewSet(viewsets.ModelViewSet):
     Suporta também ?unidades=NOME_DA_UNIDADE (exato ou parcial).
     """
     serializer_class = LivroSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
