@@ -58,16 +58,26 @@ def build_powerbi_dataset() -> dict[str, Any]:
         )
     ]
 
-    fato_acervo = [
-        {
-            "unidade_id": row["unidade_id"],
-            "ibge_bairro_codigo": row["unidade__ibge_bairro_codigo"],
-            "genero": row["livro__genero__nome"] or "Não informado",
-            "tipo_obra": row["livro__tipo_obra__nome"] or "Não informado",
-            "titulos": row["titulos"],
-            "exemplares": row["exemplares"] or 0,
-        }
-        for row in LivroUnidade.objects.values(
+    open_by_acervo_group = {
+        (
+            row["unidade_id"],
+            row["livro__genero__nome"] or "Não informado",
+            row["livro__tipo_obra__nome"] or "Não informado",
+        ): row["emprestimos_abertos"]
+        for row in Emprestimo.objects.filter(
+            status=Emprestimo.STATUS_ABERTO
+        )
+        .values(
+            "unidade_id",
+            "livro__genero__nome",
+            "livro__tipo_obra__nome",
+        )
+        .annotate(emprestimos_abertos=Count("id"))
+    }
+
+    fato_acervo = []
+    for row in (
+        LivroUnidade.objects.values(
             "unidade_id",
             "unidade__ibge_bairro_codigo",
             "livro__genero__nome",
@@ -82,7 +92,29 @@ def build_powerbi_dataset() -> dict[str, Any]:
             "livro__genero__nome",
             "livro__tipo_obra__nome",
         )
-    ]
+    ):
+        genero = row["livro__genero__nome"] or "Não informado"
+        tipo_obra = row["livro__tipo_obra__nome"] or "Não informado"
+        exemplares = int(row["exemplares"] or 0)
+        abertos = int(
+            open_by_acervo_group.get(
+                (row["unidade_id"], genero, tipo_obra),
+                0,
+            )
+            or 0
+        )
+        fato_acervo.append(
+            {
+                "unidade_id": row["unidade_id"],
+                "ibge_bairro_codigo": row["unidade__ibge_bairro_codigo"],
+                "genero": genero,
+                "tipo_obra": tipo_obra,
+                "titulos": row["titulos"],
+                "exemplares": exemplares,
+                "emprestimos_abertos": abertos,
+                "exemplares_disponiveis": max(0, exemplares - abertos),
+            }
+        )
 
     fato_circulacao_mensal = [
         {

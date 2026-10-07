@@ -1,0 +1,80 @@
+// Bibliotecas Conectadas — PI4
+// Medidas recomendadas. Criar em uma tabela de medidas no Power BI.
+
+Títulos =
+SUM ( FatoAcervo[titulos] )
+
+Exemplares =
+SUM ( FatoAcervo[exemplares] )
+
+Empréstimos abertos =
+SUM ( FatoAcervo[emprestimos_abertos] )
+
+Exemplares disponíveis =
+SUM ( FatoAcervo[exemplares_disponiveis] )
+
+Disponibilidade % =
+DIVIDE ( [Exemplares disponíveis], [Exemplares] )
+
+Empréstimos iniciados =
+SUM ( FatoCirculacaoMensal[emprestimos_iniciados] )
+
+Devoluções =
+SUM ( FatoDevolucoesMensal[devolucoes] )
+
+Títulos com circulação =
+DISTINCTCOUNT ( FatoTitulos[livro_id] )
+
+Empréstimos por título com circulação =
+DIVIDE ( [Empréstimos iniciados], [Títulos com circulação] )
+
+População — bairro da unidade =
+VAR CodigoBairro =
+    SELECTEDVALUE ( DimUnidade[ibge_bairro_codigo] )
+RETURN
+    IF (
+        ISBLANK ( CodigoBairro ),
+        BLANK (),
+        CALCULATE (
+            MAX ( DimBairro[populacao_total] ),
+            TREATAS ( { CodigoBairro }, DimBairro[cd_bairro] )
+        )
+    )
+
+Taxa alfabetização 15+ — bairro da unidade =
+VAR CodigoBairro =
+    SELECTEDVALUE ( DimUnidade[ibge_bairro_codigo] )
+RETURN
+    IF (
+        ISBLANK ( CodigoBairro ),
+        BLANK (),
+        CALCULATE (
+            MAX ( DimBairro[taxa_alfabetizacao_15_mais_pct] ),
+            TREATAS ( { CodigoBairro }, DimBairro[cd_bairro] )
+        )
+    )
+
+Renda mediana responsável — bairro da unidade =
+VAR CodigoBairro =
+    SELECTEDVALUE ( DimUnidade[ibge_bairro_codigo] )
+RETURN
+    IF (
+        ISBLANK ( CodigoBairro ),
+        BLANK (),
+        CALCULATE (
+            MAX ( DimBairro[renda_responsavel_mediana] ),
+            TREATAS ( { CodigoBairro }, DimBairro[cd_bairro] )
+        )
+    )
+
+Bairros no recorte =
+MAX ( QualidadeIBGE[bairros_total] )
+
+Bairros sem renda publicada =
+MAX ( QualidadeIBGE[bairros_sem_renda] )
+
+Diferenças Básico × Demografia =
+MAX ( QualidadeIBGE[diferencas_total_basico_demografia] )
+
+Diferenças Demografia × faixas etárias =
+MAX ( QualidadeIBGE[diferencas_total_demografia_faixas_etarias] )
