@@ -265,6 +265,91 @@ def isbn_equivalents(isbn: str) -> set[str]:
     return values
 
 
+class BrasilApiLookupService:
+    def __init__(self):
+        self.base_url = settings.BRASILAPI_BASE_URL.rstrip("/")
+        self.timeout = settings.BRASILAPI_TIMEOUT_SECONDS
+
+    def lookup(self, isbn: str) -> dict:
+        normalized_isbn = normalize_isbn(isbn)
+        url = f"{self.base_url}/isbn/v1/{normalized_isbn}"
+
+        request = Request(
+            url=url,
+            method="GET",
+            headers={
+                "Accept": "application/json",
+                "User-Agent": settings.OPENLIBRARY_USER_AGENT,
+            },
+        )
+
+        try:
+            with urlopen(request, timeout=self.timeout) as response:
+                body = response.read().decode("utf-8")
+                data = json.loads(body) if body else {}
+        except HTTPError as exc:
+            if exc.code == 404:
+                raise IsbnNotFoundError(
+                    "ISBN não encontrado na BrasilAPI."
+                ) from exc
+            if exc.code == 400:
+                raise InvalidIsbnError(
+                    "ISBN inválido para consulta."
+                ) from exc
+            raise ExternalServiceError(
+                "Falha ao consultar BrasilAPI."
+            ) from exc
+        except (URLError, TimeoutError, json.JSONDecodeError) as exc:
+            raise ExternalServiceError(
+                "Falha ao consultar BrasilAPI."
+            ) from exc
+
+        if not self._matches_requested_isbn(normalized_isbn, data):
+            raise IsbnNotFoundError(
+                "A BrasilAPI retornou uma edição diferente do ISBN solicitado."
+            )
+
+        payload = self._map_to_payload(normalized_isbn, data)
+        if not payload.get("titulo") and not payload.get("autor"):
+            raise IsbnNotFoundError("ISBN sem metadados úteis na BrasilAPI.")
+        return payload
+
+    def _matches_requested_isbn(self, isbn: str, data: dict) -> bool:
+        returned = str(data.get("isbn") or "").strip()
+        if not returned:
+            return False
+
+        try:
+            return bool(isbn_equivalents(isbn) & isbn_equivalents(returned))
+        except InvalidIsbnError:
+            return False
+
+    def _map_to_payload(self, isbn: str, data: dict) -> dict:
+        authors = data.get("authors", [])
+        author = ", ".join(
+            str(name).strip()
+            for name in authors
+            if str(name).strip()
+        ) if isinstance(authors, list) else ""
+
+        year = data.get("year")
+        publication_date = f"{year}-01-01" if isinstance(year, int) and year > 0 else ""
+
+        provider = str(data.get("provider") or "unknown").strip().lower()
+
+        return {
+            "isbn": isbn,
+            "titulo": str(data.get("title") or "").strip(),
+            "autor": author,
+            "editora": str(data.get("publisher") or "").strip(),
+            "data_publicacao": publication_date,
+            "paginas": data.get("page_count") or None,
+            "capa": str(data.get("cover_url") or "").strip(),
+            "idioma": "Portuguese",
+            "source": f"brasilapi:{provider}",
+        }
+
+
 class GoogleBooksLookupService:
     def __init__(self):
         self.base_url = settings.GOOGLE_BOOKS_BASE_URL.rstrip("/")
@@ -407,6 +492,7 @@ class BookMetadataLookupService:
     def __init__(self):
         self.providers = [
             OpenLibraryLookupService(),
+            BrasilApiLookupService(),
             GoogleBooksLookupService(),
         ]
 

@@ -1,4 +1,6 @@
 # 📄 src/gestor/presentation/serializers.py
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from rest_framework import serializers
@@ -14,6 +16,108 @@ from gestor.infrastructure.territory_service import (
     is_valid_neighborhood_code,
     neighborhood_name_by_code,
 )
+
+
+# ============== Acessos à plataforma ==============
+class AccessAccountSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField(max_length=150)
+    first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    email = serializers.EmailField(required=False, allow_blank=True)
+    role = serializers.ChoiceField(choices=["admin", "staff"])
+    active = serializers.BooleanField(default=True)
+    password = serializers.CharField(
+        write_only=True,
+        required=False,
+        trim_whitespace=False,
+    )
+    last_login = serializers.DateTimeField(read_only=True, allow_null=True)
+
+    def to_representation(self, instance):
+        return {
+            "id": instance.id,
+            "username": instance.username,
+            "first_name": instance.first_name,
+            "last_name": instance.last_name,
+            "email": instance.email,
+            "role": "admin" if instance.is_superuser else "staff",
+            "active": instance.is_active,
+            "last_login": instance.last_login,
+        }
+
+    def validate_username(self, value):
+        username = str(value or "").strip()
+        if not username:
+            raise serializers.ValidationError("Informe o nome de usuário.")
+
+        User = get_user_model()
+        qs = User.objects.filter(username__iexact=username)
+        instance = getattr(self, "instance", None)
+        if instance is not None:
+            qs = qs.exclude(pk=instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError(
+                "Já existe uma conta com este nome de usuário."
+            )
+        return username
+
+    def validate(self, attrs):
+        password = attrs.get("password")
+        if self.instance is None and not password:
+            raise serializers.ValidationError({
+                "password": "Informe uma senha temporária para a nova conta."
+            })
+
+        if password:
+            candidate = self.instance or get_user_model()(username=attrs.get("username", ""))
+            validate_password(password, user=candidate)
+
+        return attrs
+
+    def create(self, validated_data):
+        User = get_user_model()
+        password = validated_data.pop("password")
+        role = validated_data.pop("role")
+        active = validated_data.pop("active", True)
+
+        user = User(
+            **validated_data,
+            is_active=active,
+            is_staff=True,
+            is_superuser=(role == "admin"),
+        )
+        user.set_password(password)
+        user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        validated_data.pop("password", None)
+        role = validated_data.pop(
+            "role",
+            "admin" if instance.is_superuser else "staff",
+        )
+        active = validated_data.pop("active", instance.is_active)
+
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+
+        instance.is_active = active
+        instance.is_staff = True
+        instance.is_superuser = role == "admin"
+        instance.save()
+        return instance
+
+
+class AccessPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        write_only=True,
+        trim_whitespace=False,
+    )
+
+    def validate_password(self, value):
+        validate_password(value, user=self.context.get("user"))
+        return value
 
 
 # ============== Unidades ==============

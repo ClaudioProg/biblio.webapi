@@ -15,6 +15,7 @@ from gestor.domain.entities.usuario import Usuario
 from gestor.domain.entities.emprestimo import Emprestimo
 from gestor.infrastructure.external_book_services import (
     BookMetadataLookupService,
+    BrasilApiLookupService,
     GoogleBooksLookupService,
     IsbnNotFoundError,
     isbn_equivalents,
@@ -186,6 +187,117 @@ class GestorApiRegressionTests(APITestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertIn("current_password", response.data)
+
+    def test_staff_cannot_manage_platform_access_accounts(self):
+        response = self.client.get("/gestor/acessos/")
+        self.assertEqual(response.status_code, 403)
+
+    def test_admin_can_create_staff_access_account_and_new_account_can_login(self):
+        self.auth_user.is_superuser = True
+        self.auth_user.save(update_fields=["is_superuser"])
+
+        create = self.client.post(
+            "/gestor/acessos/",
+            {
+                "username": "bibliotecaria_teste",
+                "first_name": "Bibliotecária",
+                "last_name": "Teste",
+                "email": "bibliotecaria@example.com",
+                "role": "staff",
+                "active": True,
+                "password": "SenhaTemporaria789!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(create.status_code, 201)
+        self.assertNotIn("password", create.data)
+        self.assertEqual(create.data["role"], "staff")
+        self.assertTrue(create.data["active"])
+
+        login = APIClient().post(
+            "/gestor/auth/login/",
+            {
+                "username": "bibliotecaria_teste",
+                "password": "SenhaTemporaria789!",
+            },
+            format="json",
+        )
+        self.assertEqual(login.status_code, 200)
+        self.assertEqual(login.data["user"]["role"], "staff")
+
+    def test_admin_cannot_deactivate_own_account(self):
+        self.auth_user.is_superuser = True
+        self.auth_user.save(update_fields=["is_superuser"])
+
+        response = self.client.patch(
+            f"/gestor/acessos/{self.auth_user.id}/",
+            {"active": False},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 409)
+        self.auth_user.refresh_from_db()
+        self.assertTrue(self.auth_user.is_active)
+        self.assertTrue(self.auth_user.is_superuser)
+
+    def test_last_admin_cannot_be_demoted(self):
+        self.auth_user.is_superuser = True
+        self.auth_user.save(update_fields=["is_superuser"])
+
+        response = self.client.patch(
+            f"/gestor/acessos/{self.auth_user.id}/",
+            {"role": "staff"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 409)
+        self.auth_user.refresh_from_db()
+        self.assertTrue(self.auth_user.is_superuser)
+
+    def test_admin_can_reset_staff_password_and_invalidates_old_token(self):
+        self.auth_user.is_superuser = True
+        self.auth_user.save(update_fields=["is_superuser"])
+        User = get_user_model()
+        staff = User.objects.create_user(
+            username="operador_reset",
+            password="SenhaAnterior789!",
+            is_staff=True,
+        )
+        old_token = Token.objects.create(user=staff)
+
+        response = self.client.post(
+            f"/gestor/acessos/{staff.id}/reset-password/",
+            {"password": "SenhaNova789!"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Token.objects.filter(key=old_token.key).exists())
+
+        login = APIClient().post(
+            "/gestor/auth/login/",
+            {
+                "username": "operador_reset",
+                "password": "SenhaNova789!",
+            },
+            format="json",
+        )
+        self.assertEqual(login.status_code, 200)
+
+    def test_access_accounts_are_deactivated_not_deleted(self):
+        self.auth_user.is_superuser = True
+        self.auth_user.save(update_fields=["is_superuser"])
+        staff = get_user_model().objects.create_user(
+            username="operador_preservado",
+            password="SenhaValida789!",
+            is_staff=True,
+        )
+
+        response = self.client.delete(f"/gestor/acessos/{staff.id}/")
+
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(get_user_model().objects.filter(pk=staff.id).exists())
 
     def test_unidade_crud_persists_through_api(self):
         create = self.client.post(
@@ -735,6 +847,58 @@ class GestorApiRegressionTests(APITestCase):
             {"8587600826", "9788587600820"},
         )
 
+    def test_brasilapi_maps_fundamentos_em_infectologia(self):
+        service = BrasilApiLookupService()
+        payload = service._map_to_payload(
+            "9788587600820",
+            {
+                "isbn": "8587600826",
+                "title": "FUNDAMENTOS EM INFECTOLOGIA",
+                "authors": [
+                    "ENIO ROBERTO PIETRA PEDROSO",
+                    "MANOEL OTÁVIO DA COSTA ROCHA",
+                ],
+                "publisher": "RUBIO",
+                "year": None,
+                "page_count": None,
+                "cover_url": None,
+                "provider": "cbl",
+            },
+        )
+
+        self.assertEqual(payload["titulo"], "FUNDAMENTOS EM INFECTOLOGIA")
+        self.assertEqual(payload["editora"], "RUBIO")
+        self.assertIn("ENIO ROBERTO PIETRA PEDROSO", payload["autor"])
+        self.assertEqual(payload["source"], "brasilapi:cbl")
+
+    def test_brasilapi_accepts_equivalent_isbn10_response(self):
+        service = BrasilApiLookupService()
+        self.assertTrue(
+            service._matches_requested_isbn(
+                "9788587600820",
+                {"isbn": "8587600826"},
+            )
+        )
+
+    def test_brasilapi_maps_etnografias_even_without_authors(self):
+        service = BrasilApiLookupService()
+        payload = service._map_to_payload(
+            "9788576173755",
+            {
+                "isbn": "9788576173755",
+                "title": "Etnografias em serviços de saúde",
+                "authors": [],
+                "publisher": "Garamond",
+                "year": None,
+                "page_count": None,
+                "provider": "cbl",
+            },
+        )
+        self.assertEqual(payload["titulo"], "Etnografias em serviços de saúde")
+        self.assertEqual(payload["autor"], "")
+        self.assertEqual(payload["editora"], "Garamond")
+        self.assertEqual(payload["source"], "brasilapi:cbl")
+
     def test_google_books_requires_exact_identifier_match(self):
         service = GoogleBooksLookupService()
         item = {
@@ -801,6 +965,10 @@ class GestorApiRegressionTests(APITestCase):
             side_effect=IsbnNotFoundError("não encontrado"),
         ), patch.object(
             service.providers[1],
+            "lookup",
+            side_effect=IsbnNotFoundError("não encontrado"),
+        ), patch.object(
+            service.providers[2],
             "lookup",
             return_value=expected,
         ):

@@ -70,6 +70,12 @@ OPENLIBRARY_USER_AGENT = env(
 )
 OPENLIBRARY_CONTACT_EMAIL = env("OPENLIBRARY_CONTACT_EMAIL", default="")
 
+BRASILAPI_BASE_URL = env(
+    "BRASILAPI_BASE_URL",
+    default="https://brasilapi.com.br/api",
+)
+BRASILAPI_TIMEOUT_SECONDS = env.float("BRASILAPI_TIMEOUT_SECONDS", default=8.0)
+
 GOOGLE_BOOKS_BASE_URL = env(
     "GOOGLE_BOOKS_BASE_URL",
     default="https://www.googleapis.com/books/v1",

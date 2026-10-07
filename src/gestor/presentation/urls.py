@@ -7,6 +7,7 @@ from gestor.presentation.views import (
     LivroUnidadeViewSet,
     UsuarioViewSet,
     EmprestimoViewSet,
+    AccessAccountViewSet,
     auth_login,
     auth_logout,
     auth_me,
@@ -25,6 +26,7 @@ router.register(r"unidades", UnidadeViewSet, basename="unidade")
 router.register(r"livro-unidades", LivroUnidadeViewSet, basename="livro-unidade")
 router.register(r"usuarios", UsuarioViewSet, basename="usuario")
 router.register(r"emprestimos", EmprestimoViewSet, basename="emprestimo")
+router.register(r"acessos", AccessAccountViewSet, basename="acesso")
 
 # ---------- URLs principais ----------
 urlpatterns = [

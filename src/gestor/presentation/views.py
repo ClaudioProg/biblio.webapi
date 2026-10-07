@@ -3,7 +3,7 @@ from django.db.models import Count, Q, Sum
 from django.db.models.deletion import ProtectedError
 from django.core.cache import cache
 from django.conf import settings
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import viewsets, filters, permissions, status
@@ -14,6 +14,7 @@ from rest_framework.decorators import (
     authentication_classes,
     permission_classes,
 )
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
@@ -30,6 +31,8 @@ from gestor.presentation.serializers import (
     LivroUnidadeSerializer,
     UsuarioSerializer,
     EmprestimoSerializer,
+    AccessAccountSerializer,
+    AccessPasswordSerializer,
 )
 from gestor.infrastructure.external_book_services import (
     BookMetadataLookupService,
@@ -64,6 +67,121 @@ class PowerBIAnalyticsPermission(permissions.BasePermission):
             or user.is_superuser
             or user.groups.filter(name=POWERBI_READER_GROUP).exists()
         )
+
+
+class IsPlatformAdmin(permissions.BasePermission):
+    message = "Apenas administradores podem gerenciar acessos."
+
+    def has_permission(self, request, view):
+        user = getattr(request, "user", None)
+        return bool(
+            user
+            and user.is_authenticated
+            and user.is_active
+            and user.is_superuser
+        )
+
+
+class AccessAccountViewSet(viewsets.ModelViewSet):
+    serializer_class = AccessAccountSerializer
+    permission_classes = [IsPlatformAdmin]
+    pagination_class = None
+    http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
+
+    def get_queryset(self):
+        User = get_user_model()
+        return (
+            User.objects.filter(Q(is_staff=True) | Q(is_superuser=True))
+            .distinct()
+            .order_by("-is_superuser", "username")
+        )
+
+    def _would_remove_last_admin(self, instance, attrs):
+        current_role = "admin" if instance.is_superuser else "staff"
+        target_role = attrs.get("role", current_role)
+        target_active = attrs.get("active", instance.is_active)
+
+        if not instance.is_superuser:
+            return False
+        if target_role == "admin" and target_active:
+            return False
+
+        User = get_user_model()
+        return not User.objects.filter(
+            is_superuser=True,
+            is_active=True,
+        ).exclude(pk=instance.pk).exists()
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        partial = kwargs.pop("partial", False)
+        serializer = self.get_serializer(
+            instance,
+            data=request.data,
+            partial=partial,
+        )
+        serializer.is_valid(raise_exception=True)
+
+        if instance.pk == request.user.pk:
+            target_role = serializer.validated_data.get(
+                "role",
+                "admin" if instance.is_superuser else "staff",
+            )
+            target_active = serializer.validated_data.get(
+                "active",
+                instance.is_active,
+            )
+            if target_role != "admin" or not target_active:
+                return Response(
+                    {
+                        "detail": (
+                            "Você não pode remover seu próprio acesso administrativo "
+                            "nem desativar sua própria conta."
+                        )
+                    },
+                    status=status.HTTP_409_CONFLICT,
+                )
+
+        if self._would_remove_last_admin(instance, serializer.validated_data):
+            return Response(
+                {"detail": "A plataforma deve manter pelo menos um administrador ativo."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs["partial"] = True
+        return self.update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        return Response(
+            {
+                "detail": (
+                    "Contas de acesso não são excluídas. "
+                    "Desative a conta para preservar o histórico administrativo."
+                )
+            },
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
+    @action(detail=True, methods=["post"], url_path="reset-password")
+    def reset_password(self, request, pk=None):
+        user = self.get_object()
+        serializer = AccessPasswordSerializer(
+            data=request.data,
+            context={"user": user},
+        )
+        serializer.is_valid(raise_exception=True)
+
+        user.set_password(serializer.validated_data["password"])
+        user.save(update_fields=["password"])
+        Token.objects.filter(user=user).delete()
+
+        return Response({
+            "detail": "Senha redefinida com sucesso. Sessões anteriores foram invalidadas."
+        })
 
 
 @api_view(["POST"])
