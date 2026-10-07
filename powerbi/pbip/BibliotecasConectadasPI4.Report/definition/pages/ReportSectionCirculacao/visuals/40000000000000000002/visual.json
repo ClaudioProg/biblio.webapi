@@ -1,0 +1,79 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "40000000000000000002",
+  "position": {
+    "x": 340,
+    "y": 20,
+    "z": 2000,
+    "height": 100,
+    "width": 920,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Circulação Mensal"
+                    }
+                  },
+                  "Property": "Empréstimos iniciados"
+                }
+              },
+              "queryRef": "Circulação Mensal.Empréstimos iniciados",
+              "nativeQueryRef": "Empréstimos iniciados"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Devoluções Mensais"
+                    }
+                  },
+                  "Property": "Devoluções"
+                }
+              },
+              "queryRef": "Devoluções Mensais.Devoluções",
+              "nativeQueryRef": "Devoluções"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Títulos"
+                    }
+                  },
+                  "Property": "Títulos com circulação"
+                }
+              },
+              "queryRef": "Títulos.Títulos com circulação",
+              "nativeQueryRef": "Títulos com circulação"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Acervo"
+                    }
+                  },
+                  "Property": "Exemplares disponíveis"
+                }
+              },
+              "queryRef": "Acervo.Exemplares disponíveis",
+              "nativeQueryRef": "Exemplares disponíveis"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

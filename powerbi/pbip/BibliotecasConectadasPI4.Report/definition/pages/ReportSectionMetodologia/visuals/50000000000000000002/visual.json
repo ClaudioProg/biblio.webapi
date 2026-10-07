@@ -1,0 +1,144 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "50000000000000000002",
+  "position": {
+    "x": 20,
+    "y": 140,
+    "z": 2000,
+    "height": 560,
+    "width": 1240,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "Bairro"
+                }
+              },
+              "queryRef": "Bairros.Bairro",
+              "nativeQueryRef": "Bairro"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "População Total"
+                }
+              },
+              "queryRef": "Bairros.População Total",
+              "nativeQueryRef": "População Total"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "Taxa Alfabetização 15+"
+                }
+              },
+              "queryRef": "Bairros.Taxa Alfabetização 15+",
+              "nativeQueryRef": "Taxa Alfabetização 15+"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "Renda Mediana do Responsável"
+                }
+              },
+              "queryRef": "Bairros.Renda Mediana do Responsável",
+              "nativeQueryRef": "Renda Mediana do Responsável"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bairros"
+                    }
+                  },
+                  "Property": "Renda Disponível"
+                }
+              },
+              "queryRef": "Bairros.Renda Disponível",
+              "nativeQueryRef": "Renda Disponível"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "columnAdjustment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'growToFit'"
+                }
+              }
+            },
+            "autoSizeColumnWidth": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Cobertura territorial e disponibilidade de indicadores'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

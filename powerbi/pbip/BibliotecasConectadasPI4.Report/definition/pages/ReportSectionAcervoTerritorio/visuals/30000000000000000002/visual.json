@@ -1,0 +1,93 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "30000000000000000002",
+  "position": {
+    "x": 340,
+    "y": 20,
+    "z": 2000,
+    "height": 100,
+    "width": 920,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bibliotecas"
+                    }
+                  },
+                  "Property": "População — bairro da unidade"
+                }
+              },
+              "queryRef": "Bibliotecas.População — bairro da unidade",
+              "nativeQueryRef": "População — bairro da unidade"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bibliotecas"
+                    }
+                  },
+                  "Property": "Taxa alfabetização 15+ — bairro da unidade"
+                }
+              },
+              "queryRef": "Bibliotecas.Taxa alfabetização 15+ — bairro da unidade",
+              "nativeQueryRef": "Taxa alfabetização 15+ — bairro da unidade"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Bibliotecas"
+                    }
+                  },
+                  "Property": "Renda mediana responsável — bairro da unidade"
+                }
+              },
+              "queryRef": "Bibliotecas.Renda mediana responsável — bairro da unidade",
+              "nativeQueryRef": "Renda mediana responsável — bairro da unidade"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Acervo"
+                    }
+                  },
+                  "Property": "Títulos"
+                }
+              },
+              "queryRef": "Acervo.Títulos",
+              "nativeQueryRef": "Títulos"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Acervo"
+                    }
+                  },
+                  "Property": "Exemplares"
+                }
+              },
+              "queryRef": "Acervo.Exemplares",
+              "nativeQueryRef": "Exemplares"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

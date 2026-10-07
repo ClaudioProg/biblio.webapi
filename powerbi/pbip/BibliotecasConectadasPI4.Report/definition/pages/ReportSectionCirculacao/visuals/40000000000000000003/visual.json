@@ -1,0 +1,99 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "40000000000000000003",
+  "position": {
+    "x": 20,
+    "y": 140,
+    "z": 3000,
+    "height": 560,
+    "width": 800,
+    "tabOrder": 3000
+  },
+  "visual": {
+    "visualType": "lineChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Calendário"
+                    }
+                  },
+                  "Property": "Mês Início"
+                }
+              },
+              "queryRef": "Calendário.Mês Início",
+              "nativeQueryRef": "Mês Início",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Circulação Mensal"
+                    }
+                  },
+                  "Property": "Empréstimos iniciados"
+                }
+              },
+              "queryRef": "Circulação Mensal.Empréstimos iniciados",
+              "nativeQueryRef": "Empréstimos iniciados"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Devoluções Mensais"
+                    }
+                  },
+                  "Property": "Devoluções"
+                }
+              },
+              "queryRef": "Devoluções Mensais.Devoluções",
+              "nativeQueryRef": "Devoluções"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Empréstimos e devoluções por mês'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
