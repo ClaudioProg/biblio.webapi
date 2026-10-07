@@ -89,6 +89,12 @@ class EmprestimoSerializer(serializers.ModelSerializer):
         if not livro:
             raise serializers.ValidationError({"livro": "Livro é obrigatório no empréstimo."})
 
+        usuario = attrs.get("usuario", getattr(self.instance, "usuario", None))
+        if status == Emprestimo.STATUS_ABERTO and usuario and not usuario.ativo:
+            raise serializers.ValidationError({
+                "usuario": "Usuário inativo não pode manter ou receber empréstimo aberto."
+            })
+
         livro_unidade = LivroUnidade.objects.filter(livro=livro, unidade=unidade).first()
         if not livro_unidade or livro_unidade.exemplares <= 0:
             raise serializers.ValidationError(
@@ -141,12 +147,29 @@ class LivroUnidadeWriteSerializer(serializers.ModelSerializer):
 
 
 class LivroUnidadeReadSerializer(serializers.ModelSerializer):
-    # devolve dados da unidade
+    # devolve dados da unidade e disponibilidade atual
     unidade = UnidadeSerializer(read_only=True)
+    emprestimos_abertos = serializers.SerializerMethodField()
+    exemplares_disponiveis = serializers.SerializerMethodField()
 
     class Meta:
         model = LivroUnidade
-        fields = ["unidade", "exemplares"]
+        fields = [
+            "unidade",
+            "exemplares",
+            "emprestimos_abertos",
+            "exemplares_disponiveis",
+        ]
+
+    def get_emprestimos_abertos(self, obj):
+        return Emprestimo.objects.filter(
+            livro=obj.livro,
+            unidade=obj.unidade,
+            status=Emprestimo.STATUS_ABERTO,
+        ).count()
+
+    def get_exemplares_disponiveis(self, obj):
+        return max(0, int(obj.exemplares) - self.get_emprestimos_abertos(obj))
 
 
 # HÍBRIDO para manter compatibilidade com LivroUnidadeViewSet (read + write)
@@ -154,7 +177,33 @@ class LivroUnidadeSerializer(LivroUnidadeWriteSerializer):
     """
     - Na escrita (create/update), usa PrimaryKeyRelatedField (como Write).
     - Na leitura (response), serializa como Read (com Unidade detalhada).
+    - Não permite reduzir o estoque abaixo dos empréstimos ainda abertos.
     """
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        instance = self.instance
+        if instance is None:
+            return attrs
+
+        unidade = attrs.get("unidade", instance.unidade)
+        exemplares = attrs.get("exemplares", instance.exemplares)
+        abertos = Emprestimo.objects.filter(
+            livro=instance.livro,
+            unidade=unidade,
+            status=Emprestimo.STATUS_ABERTO,
+        ).count()
+
+        if exemplares < abertos:
+            raise serializers.ValidationError({
+                "exemplares": (
+                    f"Não é possível reduzir para {exemplares}: existem "
+                    f"{abertos} empréstimo(s) aberto(s) nesta unidade."
+                )
+            })
+
+        return attrs
+
     def to_representation(self, instance):
         return LivroUnidadeReadSerializer(instance).data
 
@@ -202,6 +251,45 @@ class LivroSerializer(serializers.ModelSerializer):
     def _clean_none(self, data: dict) -> dict:
         """Remove chaves com None para evitar tentar gravar NULL em colunas NOT NULL."""
         return {k: v for k, v in data.items() if v is not None}
+
+    def _validate_unidades_against_open_loans(self, livro, unidades_payload):
+        requested = {}
+        for item in unidades_payload:
+            unidade = item["unidade"]
+            requested[unidade.id] = int(item.get("exemplares", 1))
+
+        open_counts = {}
+        for emprestimo in Emprestimo.objects.filter(
+            livro=livro,
+            status=Emprestimo.STATUS_ABERTO,
+            unidade__isnull=False,
+        ).values("unidade_id"):
+            unidade_id = emprestimo["unidade_id"]
+            open_counts[unidade_id] = open_counts.get(unidade_id, 0) + 1
+
+        errors = []
+        for unidade_id, open_count in open_counts.items():
+            requested_count = requested.get(unidade_id, 0)
+            if requested_count < open_count:
+                unidade_nome = (
+                    Unidade.objects.filter(pk=unidade_id)
+                    .values_list("nome", flat=True)
+                    .first()
+                    or f"Unidade {unidade_id}"
+                )
+                errors.append(
+                    f"{unidade_nome}: {open_count} empréstimo(s) aberto(s), "
+                    f"mas o novo estoque informado é {requested_count}."
+                )
+
+        if errors:
+            raise serializers.ValidationError({
+                "unidades": [
+                    "Não é possível remover uma unidade ou reduzir exemplares "
+                    "abaixo da quantidade atualmente emprestada.",
+                    *errors,
+                ]
+            })
 
     def _friendly_integrity_message(self, exc: IntegrityError) -> dict:
         """Mapeia mensagens comuns de integridade para respostas amigáveis."""
@@ -282,6 +370,9 @@ class LivroSerializer(serializers.ModelSerializer):
         # Só sincroniza unidades se o campo vier no payload; caso contrário, mantém como está
         unidades_payload = validated_data.pop("unidades", None)
         validated_data = self._clean_none(validated_data)
+
+        if unidades_payload is not None:
+            self._validate_unidades_against_open_loans(instance, unidades_payload)
 
         try:
             instance = super().update(instance, validated_data)

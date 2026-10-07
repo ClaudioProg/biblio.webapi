@@ -7,9 +7,12 @@ from gestor.presentation.views import (
     LivroUnidadeViewSet,
     UsuarioViewSet,
     EmprestimoViewSet,
+    auth_login,
+    auth_logout,
+    auth_me,
+    auth_change_password,
     dados_iniciais,
     isbn_lookup,
-    db_info,  # 👈 adiciona aqui
 )
 
 # ---------- Roteador padrão DRF ----------
@@ -22,8 +25,11 @@ router.register(r"emprestimos", EmprestimoViewSet, basename="emprestimo")
 
 # ---------- URLs principais ----------
 urlpatterns = [
+    path("auth/login/", auth_login, name="auth-login"),
+    path("auth/logout/", auth_logout, name="auth-logout"),
+    path("auth/me/", auth_me, name="auth-me"),
+    path("auth/change-password/", auth_change_password, name="auth-change-password"),
     path("dados-iniciais/", dados_iniciais, name="dados-iniciais"),
     path("livros/isbn-lookup/", isbn_lookup, name="isbn-lookup"),
-    path("debug/db-info/", db_info, name="db-info"),  # 👈 nova rota
     path("", include(router.urls)),
 ]

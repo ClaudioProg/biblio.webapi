@@ -22,13 +22,15 @@ environ.Env.read_env(BASE_DIR / ".env")
 # =========================
 # Chaves / Flags
 # =========================
-SECRET_KEY = env(
-    "SECRET_KEY",
-    default="django-insecure-h!ds_!gx+#axo!pggb^chklwxc&7)uq^jo6de48*b-l#q^0(51",
-)
-
 # Produção como padrão (pode sobrescrever no .env)
 DEBUG = env.bool("DEBUG", default=False)
+
+SECRET_KEY = env("SECRET_KEY", default="")
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = "django-insecure-dev-only-change-me"
+    else:
+        raise RuntimeError("SECRET_KEY é obrigatória quando DEBUG=False.")
 
 ALLOWED_HOSTS = env.list(
     "ALLOWED_HOSTS",
@@ -95,6 +97,7 @@ INSTALLED_APPS = [
 
     # APIs
     "rest_framework",
+    "rest_framework.authtoken",
     "drf_spectacular",
     "corsheaders",
 
@@ -204,10 +207,21 @@ else:
         ],
     }
 
-# 🔓 Permissões abertas temporariamente (sem autenticação real)
-REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
-    "rest_framework.permissions.AllowAny"
+# Autenticação por token para proteger cadastros e operações da biblioteca.
+REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = [
+    "rest_framework.authentication.TokenAuthentication"
 ]
+REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = [
+    "rest_framework.permissions.IsAuthenticated"
+]
+REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = [
+    "rest_framework.throttling.AnonRateThrottle",
+    "rest_framework.throttling.UserRateThrottle",
+]
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
+    "anon": "20/min",
+    "user": "300/min",
+}
 
 # 🔧 Sem paginação global -> lista vira array puro (evita {"results":[...]})
 REST_FRAMEWORK["DEFAULT_PAGINATION_CLASS"] = None
@@ -239,7 +253,7 @@ CORS_ALLOWED_ORIGINS = env.list(
 
 # Permitir previews *.vercel.app (além do domínio principal)
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://.*\.vercel\.app$",
+    r"^https://bibliotecasconectadas(?:-.*)?\.vercel\.app$",
     r"^http://localhost:\d+$",
 ]
 

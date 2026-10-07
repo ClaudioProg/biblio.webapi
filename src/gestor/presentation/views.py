@@ -1,12 +1,16 @@
 # 📁 src/gestor/presentation/views.py
 from django.db.models import Q
+from django.db.models.deletion import ProtectedError
 from django.core.cache import cache
 from django.conf import settings
-from rest_framework import viewsets, filters, permissions
-from rest_framework.decorators import api_view
+from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
+from rest_framework import viewsets, filters, permissions, status
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
-from django.db import connection
 
 from gestor.domain.entities.livro import Livro
 from gestor.domain.entities.unidade import Unidade
@@ -31,13 +35,114 @@ from gestor.infrastructure.external_book_services import (
 from gestor.infrastructure.translation_service import TranslationService
 
 # =========================================================
-# ViewSets sem paginação (array puro) e com acesso liberado
+# Autenticação da equipe gestora
 # =========================================================
 
-class UnidadeViewSet(viewsets.ModelViewSet):
+@api_view(["POST"])
+@permission_classes([permissions.AllowAny])
+def auth_login(request):
+    username = str(request.data.get("username") or "").strip()
+    password = str(request.data.get("password") or "")
+
+    if not username or not password:
+        return Response(
+            {"detail": "Informe usuário e senha."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user = authenticate(request=request, username=username, password=password)
+    if user is None or not user.is_active:
+        return Response(
+            {"detail": "Credenciais inválidas."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    token, _ = Token.objects.get_or_create(user=user)
+    role = "admin" if user.is_superuser else ("staff" if user.is_staff else "usuario")
+
+    return Response({
+        "token": token.key,
+        "user": {
+            "username": user.get_username(),
+            "name": user.get_full_name() or user.get_username(),
+            "role": role,
+        },
+    })
+
+
+@api_view(["POST"])
+def auth_logout(request):
+    Token.objects.filter(user=request.user).delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(["GET"])
+def auth_me(request):
+    user = request.user
+    role = "admin" if user.is_superuser else ("staff" if user.is_staff else "usuario")
+    return Response({
+        "username": user.get_username(),
+        "name": user.get_full_name() or user.get_username(),
+        "role": role,
+    })
+
+
+@api_view(["POST"])
+def auth_change_password(request):
+    user = request.user
+    current_password = str(request.data.get("current_password") or "")
+    new_password = str(request.data.get("new_password") or "")
+
+    if not user.check_password(current_password):
+        return Response(
+            {"current_password": "Senha atual incorreta."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        validate_password(new_password, user=user)
+    except DjangoValidationError as exc:
+        return Response(
+            {"new_password": list(exc.messages)},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user.set_password(new_password)
+    user.save(update_fields=["password"])
+
+    Token.objects.filter(user=user).delete()
+    token = Token.objects.create(user=user)
+
+    return Response({
+        "detail": "Senha alterada com sucesso.",
+        "token": token.key,
+    })
+
+
+# =========================================================
+# ViewSets sem paginação (array puro) e autenticados
+# =========================================================
+
+class ProtectLoanHistoryMixin:
+    protected_error_message = (
+        "Este registro não pode ser excluído porque possui histórico de empréstimos. "
+        "Preserve o histórico e, quando aplicável, inative ou corrija o cadastro."
+    )
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            return Response(
+                {"detail": self.protected_error_message},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+
+class UnidadeViewSet(ProtectLoanHistoryMixin, viewsets.ModelViewSet):
     queryset = Unidade.objects.all().order_by("id")
     serializer_class = UnidadeSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -51,10 +156,10 @@ class UnidadeViewSet(viewsets.ModelViewSet):
         return Response(s.data)
 
 
-class UsuarioViewSet(viewsets.ModelViewSet):
+class UsuarioViewSet(ProtectLoanHistoryMixin, viewsets.ModelViewSet):
     queryset = Usuario.objects.all().order_by("id")
     serializer_class = UsuarioSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -83,7 +188,7 @@ class EmprestimoViewSet(viewsets.ModelViewSet):
         .order_by("-data_emprestimo", "-id")
     )
     serializer_class = EmprestimoSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -118,6 +223,17 @@ class EmprestimoViewSet(viewsets.ModelViewSet):
         s = self.get_serializer(qs, many=True)
         return Response(s.data)
 
+    def destroy(self, request, *args, **kwargs):
+        return Response(
+            {
+                "detail": (
+                    "Empréstimos fazem parte do histórico de circulação e não podem "
+                    "ser excluídos. Corrija o registro ou finalize a devolução."
+                )
+            },
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
 
 class LivroUnidadeViewSet(viewsets.ModelViewSet):
     queryset = (
@@ -126,7 +242,7 @@ class LivroUnidadeViewSet(viewsets.ModelViewSet):
         .order_by("id")
     )
     serializer_class = LivroUnidadeSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
 
     filter_backends = [filters.OrderingFilter]
@@ -153,14 +269,35 @@ class LivroUnidadeViewSet(viewsets.ModelViewSet):
         s = self.get_serializer(qs, many=True)
         return Response(s.data)
 
+    def destroy(self, request, *args, **kwargs):
+        relation = self.get_object()
+        has_open_loans = Emprestimo.objects.filter(
+            livro=relation.livro,
+            unidade=relation.unidade,
+            status=Emprestimo.STATUS_ABERTO,
+        ).exists()
 
-class LivroViewSet(viewsets.ModelViewSet):
+        if has_open_loans:
+            return Response(
+                {
+                    "detail": (
+                        "O vínculo livro/unidade não pode ser removido enquanto "
+                        "houver empréstimos abertos nessa unidade."
+                    )
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        return super().destroy(request, *args, **kwargs)
+
+
+class LivroViewSet(ProtectLoanHistoryMixin, viewsets.ModelViewSet):
     """
     GET /gestor/livros/?titulo=...&autor=...&tipo_obra=ID&editora=...&isbn=...&unidades=1,2
     Suporta também ?unidades=NOME_DA_UNIDADE (exato ou parcial).
     """
     serializer_class = LivroSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     pagination_class = None
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -264,17 +401,6 @@ def dados_iniciais(_request):
         "tipo_obras": list(tipos),
     })
 
-
-# --- DEBUG: Info do banco em uso ---
-@api_view(["GET"])
-def db_info(_request):
-    cfg = connection.settings_dict
-    return Response({
-        "vendor": connection.vendor,
-        "name": cfg.get("NAME"),
-        "user": cfg.get("USER"),
-        "host": cfg.get("HOST"),
-    })
 
 
 @extend_schema(

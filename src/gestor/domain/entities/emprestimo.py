@@ -14,9 +14,9 @@ class Emprestimo(models.Model):
         (STATUS_DEVOLVIDO, "Devolvido"),
     ]
 
-    livro = models.ForeignKey(Livro, on_delete=models.CASCADE)
-    unidade = models.ForeignKey(Unidade, on_delete=models.CASCADE, null=True, blank=True)
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    livro = models.ForeignKey(Livro, on_delete=models.PROTECT)
+    unidade = models.ForeignKey(Unidade, on_delete=models.PROTECT, null=True, blank=True)
+    usuario = models.ForeignKey(Usuario, on_delete=models.PROTECT)
     data_emprestimo = models.DateField(default=timezone.localdate)
     data_prevista_devolucao = models.DateField(null=True, blank=True)
     data_devolucao = models.DateField(null=True, blank=True)
