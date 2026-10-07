@@ -1,0 +1,62 @@
+{
+  "basic": {
+    "population_total": {
+      "source": "v0001",
+      "official_description": "Total de pessoas"
+    },
+    "area_km2": {
+      "source": "AREA_KM2",
+      "official_description": "Área territorial do bairro em km²"
+    }
+  },
+  "demography": {
+    "population_demography": {
+      "source": "V01006",
+      "official_description": "Quantidade de moradores"
+    },
+    "age_0_14": {
+      "sources": ["V01031", "V01032", "V01033"],
+      "components": ["0 a 4 anos", "5 a 9 anos", "10 a 14 anos"]
+    },
+    "age_15_29": {
+      "sources": ["V01034", "V01035", "V01036"],
+      "components": ["15 a 19 anos", "20 a 24 anos", "25 a 29 anos"]
+    },
+    "age_30_59": {
+      "sources": ["V01037", "V01038", "V01039"],
+      "components": ["30 a 39 anos", "40 a 49 anos", "50 a 59 anos"]
+    },
+    "age_60_plus": {
+      "sources": ["V01040", "V01041"],
+      "components": ["60 a 69 anos", "70 anos ou mais"]
+    }
+  },
+  "literacy": {
+    "population_15_plus": {
+      "sources": ["V00644", "V00645", "V00646", "V00647", "V00648", "V00649", "V00650", "V00651", "V00652", "V00653", "V00654", "V00655", "V00656"],
+      "official_description": "População de 15 anos ou mais, somada pelas faixas etárias do tema Alfabetização"
+    },
+    "literate_15_plus": {
+      "sources": ["V00748", "V00749", "V00750", "V00751", "V00752", "V00753", "V00754", "V00755", "V00756", "V00757", "V00758", "V00759", "V00760"],
+      "official_description": "Pessoas alfabetizadas de 15 anos ou mais, somadas pelas faixas etárias"
+    },
+    "literacy_rate_15_plus_pct": {
+      "formula": "100 * literate_15_plus / population_15_plus",
+      "round": 2
+    }
+  },
+  "income": {
+    "responsible_people": {
+      "source": "V06001",
+      "official_description": "Pessoas responsáveis em domicílios particulares permanentes ocupados"
+    },
+    "responsible_income_mean": {
+      "source": "V06004",
+      "official_description": "Valor do rendimento nominal médio mensal das pessoas responsáveis com rendimentos por domicílios particulares permanentes ocupados"
+    },
+    "responsible_income_median": {
+      "source": "V06006",
+      "official_description": "Valor do rendimento nominal mediano mensal das pessoas responsáveis com rendimentos por domicílios particulares permanentes ocupados"
+    }
+  }
+}
