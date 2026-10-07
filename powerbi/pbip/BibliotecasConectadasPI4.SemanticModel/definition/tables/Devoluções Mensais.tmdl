@@ -1,0 +1,70 @@
+/// Devoluções registradas por mês, biblioteca, gênero e tipo de obra.
+table 'Devoluções Mensais'
+
+	measure Devoluções = SUM('Devoluções Mensais'[Devoluções Base])
+		formatString: #,##0
+
+	column Mês
+		dataType: dateTime
+		formatString: MMM/yyyy
+		summarizeBy: none
+		sourceColumn: mes
+
+	column 'ID da Unidade'
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: unidade_id
+
+	column 'Código do Bairro'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: ibge_bairro_codigo
+
+	column Gênero
+		dataType: string
+		summarizeBy: none
+		sourceColumn: genero
+
+	column 'Tipo de Obra'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: tipo_obra
+
+	column 'Devoluções Base'
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: devolucoes
+
+	partition 'Devoluções Mensais' = m
+		mode: import
+		source =
+			let
+				Fonte = Json.Document(
+					Web.Contents(
+						"https://biblio-webapi.onrender.com",
+						[
+							RelativePath = "gestor/analytics/powerbi/",
+							Headers = [Accept = "application/json"],
+							Timeout = #duration(0, 0, 2, 0)
+						]
+					)
+				),
+				Registros = Fonte[fato_devolucoes_mensal],
+				Tabela = Table.FromRecords(Registros),
+				Tipos = Table.TransformColumnTypes(
+					Tabela,
+					{
+						{"mes", type date},
+						{"unidade_id", Int64.Type},
+						{"ibge_bairro_codigo", type text},
+						{"genero", type text},
+						{"tipo_obra", type text},
+						{"devolucoes", Int64.Type}
+					},
+					"pt-BR"
+				)
+			in
+				Tipos

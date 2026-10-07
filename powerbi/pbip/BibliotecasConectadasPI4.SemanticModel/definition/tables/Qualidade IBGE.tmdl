@@ -1,0 +1,76 @@
+/// Indicadores de cobertura e consistência das bases territoriais do IBGE usadas no projeto.
+table 'Qualidade IBGE'
+
+	measure 'Bairros no recorte' = MAX('Qualidade IBGE'[Bairros Total Base])
+		formatString: #,##0
+
+	measure 'Bairros com renda publicada' = MAX('Qualidade IBGE'[Bairros com Renda Base])
+		formatString: #,##0
+
+	measure 'Bairros sem renda publicada' = MAX('Qualidade IBGE'[Bairros sem Renda Base])
+		formatString: #,##0
+
+	measure 'Diferenças Básico × Demografia' = MAX('Qualidade IBGE'[Diferenças Básico Demografia Base])
+		formatString: #,##0
+
+	measure 'Diferenças Demografia × Faixas Etárias' = MAX('Qualidade IBGE'[Diferenças Demografia Faixas Base])
+		formatString: #,##0
+
+	column 'Bairros Total Base'
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: bairros_total
+
+	column 'Bairros com Renda Base'
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: bairros_com_renda
+
+	column 'Bairros sem Renda Base'
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: bairros_sem_renda
+
+	column 'Diferenças Básico Demografia Base'
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: diferencas_total_basico_demografia
+
+	column 'Diferenças Demografia Faixas Base'
+		dataType: int64
+		isHidden
+		summarizeBy: sum
+		sourceColumn: diferencas_total_demografia_faixas_etarias
+
+	partition 'Qualidade IBGE' = m
+		mode: import
+		source =
+			let
+				Fonte = Json.Document(
+					Web.Contents(
+						"https://biblio-webapi.onrender.com",
+						[
+							RelativePath = "gestor/analytics/powerbi/",
+							Headers = [Accept = "application/json"],
+							Timeout = #duration(0, 0, 2, 0)
+						]
+					)
+				),
+				Registro = Fonte[qualidade_ibge],
+				Tabela = Table.FromRecords({Registro}),
+				Tipos = Table.TransformColumnTypes(
+					Tabela,
+					{
+						{"bairros_total", Int64.Type},
+						{"bairros_com_renda", Int64.Type},
+						{"bairros_sem_renda", Int64.Type},
+						{"diferencas_total_basico_demografia", Int64.Type},
+						{"diferencas_total_demografia_faixas_etarias", Int64.Type}
+					}
+				)
+			in
+				Tipos

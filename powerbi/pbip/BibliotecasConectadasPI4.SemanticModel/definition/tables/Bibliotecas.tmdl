@@ -1,0 +1,82 @@
+/// Bibliotecas cadastradas na plataforma e sua ligação opcional ao bairro oficial do IBGE.
+table Bibliotecas
+
+	measure 'População — bairro da unidade' = VAR CodigoBairro = SELECTEDVALUE('Bibliotecas'[Código do Bairro]) RETURN IF(ISBLANK(CodigoBairro), BLANK(), CALCULATE(MAX('Bairros'[População Total]), TREATAS({CodigoBairro}, 'Bairros'[Código do Bairro])))
+		formatString: #,##0
+
+	measure 'Taxa alfabetização 15+ — bairro da unidade' = VAR CodigoBairro = SELECTEDVALUE('Bibliotecas'[Código do Bairro]) RETURN IF(ISBLANK(CodigoBairro), BLANK(), CALCULATE(MAX('Bairros'[Taxa Alfabetização 15+]), TREATAS({CodigoBairro}, 'Bairros'[Código do Bairro])))
+		formatString: 0.00
+
+	measure 'Renda mediana responsável — bairro da unidade' = VAR CodigoBairro = SELECTEDVALUE('Bibliotecas'[Código do Bairro]) RETURN IF(ISBLANK(CodigoBairro), BLANK(), CALCULATE(MAX('Bairros'[Renda Mediana do Responsável]), TREATAS({CodigoBairro}, 'Bairros'[Código do Bairro])))
+		formatString: R$ #,##0.00
+
+	column 'ID da Unidade'
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: unidade_id
+
+	column Biblioteca
+		dataType: string
+		summarizeBy: none
+		sourceColumn: unidade
+
+	column Endereço
+		dataType: string
+		summarizeBy: none
+		sourceColumn: endereco
+
+	column 'Código do Bairro'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: ibge_bairro_codigo
+
+	column 'Bairro IBGE'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: ibge_bairro_nome
+
+	column Latitude
+		dataType: decimal
+		summarizeBy: none
+		dataCategory: Latitude
+		sourceColumn: latitude
+
+	column Longitude
+		dataType: decimal
+		summarizeBy: none
+		dataCategory: Longitude
+		sourceColumn: longitude
+
+	partition Bibliotecas = m
+		mode: import
+		source =
+			let
+				Fonte = Json.Document(
+					Web.Contents(
+						"https://biblio-webapi.onrender.com",
+						[
+							RelativePath = "gestor/analytics/powerbi/",
+							Headers = [Accept = "application/json"],
+							Timeout = #duration(0, 0, 2, 0)
+						]
+					)
+				),
+				Registros = Fonte[dim_unidade],
+				Tabela = Table.FromRecords(Registros),
+				Tipos = Table.TransformColumnTypes(
+					Tabela,
+					{
+						{"unidade_id", Int64.Type},
+						{"unidade", type text},
+						{"endereco", type text},
+						{"ibge_bairro_codigo", type text},
+						{"ibge_bairro_nome", type text},
+						{"latitude", type number},
+						{"longitude", type number}
+					},
+					"pt-BR"
+				)
+			in
+				Tipos

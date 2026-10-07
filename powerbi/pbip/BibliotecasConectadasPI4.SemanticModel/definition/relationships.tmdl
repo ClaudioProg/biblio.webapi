@@ -1,0 +1,27 @@
+relationship 'Bibliotecas por Bairro'
+	fromColumn: Bibliotecas.'Código do Bairro'
+	toColumn: Bairros.'Código do Bairro'
+
+relationship 'Acervo por Biblioteca'
+	fromColumn: Acervo.'ID da Unidade'
+	toColumn: Bibliotecas.'ID da Unidade'
+
+relationship 'Circulação por Biblioteca'
+	fromColumn: 'Circulação Mensal'.'ID da Unidade'
+	toColumn: Bibliotecas.'ID da Unidade'
+
+relationship 'Devoluções por Biblioteca'
+	fromColumn: 'Devoluções Mensais'.'ID da Unidade'
+	toColumn: Bibliotecas.'ID da Unidade'
+
+relationship 'Títulos por Biblioteca'
+	fromColumn: Títulos.'ID da Unidade'
+	toColumn: Bibliotecas.'ID da Unidade'
+
+relationship 'Circulação por Mês'
+	fromColumn: 'Circulação Mensal'.Mês
+	toColumn: Calendário.'Mês Início'
+
+relationship 'Devoluções por Mês'
+	fromColumn: 'Devoluções Mensais'.Mês
+	toColumn: Calendário.'Mês Início'
