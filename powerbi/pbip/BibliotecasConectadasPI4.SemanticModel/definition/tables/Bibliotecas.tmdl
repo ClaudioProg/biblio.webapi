@@ -1,13 +1,13 @@
 /// Bibliotecas cadastradas na plataforma e sua ligação opcional ao bairro oficial do IBGE.
 table Bibliotecas
 
-	measure 'População — bairro da unidade' = VAR CodigoBairro = SELECTEDVALUE(Bibliotecas['Código do Bairro']) RETURN IF(ISBLANK(CodigoBairro), BLANK(), CALCULATE(MAX(Bairros['População Total']), TREATAS({CodigoBairro}, Bairros['Código do Bairro'])))
+	measure 'População — bairro da unidade' = VAR CodigoBairro = SELECTEDVALUE('Bibliotecas'[Código do Bairro]) RETURN IF(ISBLANK(CodigoBairro), BLANK(), CALCULATE(MAX('Bairros'[População Total]), TREATAS({CodigoBairro}, 'Bairros'[Código do Bairro])))
 		formatString: #,##0
 
-	measure 'Taxa alfabetização 15+ — bairro da unidade' = VAR CodigoBairro = SELECTEDVALUE(Bibliotecas['Código do Bairro']) RETURN IF(ISBLANK(CodigoBairro), BLANK(), CALCULATE(MAX(Bairros['Taxa Alfabetização 15+']), TREATAS({CodigoBairro}, Bairros['Código do Bairro'])))
+	measure 'Taxa alfabetização 15+ — bairro da unidade' = VAR CodigoBairro = SELECTEDVALUE('Bibliotecas'[Código do Bairro]) RETURN IF(ISBLANK(CodigoBairro), BLANK(), CALCULATE(MAX('Bairros'[Taxa Alfabetização 15+]), TREATAS({CodigoBairro}, 'Bairros'[Código do Bairro])))
 		formatString: 0.00
 
-	measure 'Renda mediana responsável — bairro da unidade' = VAR CodigoBairro = SELECTEDVALUE(Bibliotecas['Código do Bairro']) RETURN IF(ISBLANK(CodigoBairro), BLANK(), CALCULATE(MAX(Bairros['Renda Mediana do Responsável']), TREATAS({CodigoBairro}, Bairros['Código do Bairro'])))
+	measure 'Renda mediana responsável — bairro da unidade' = VAR CodigoBairro = SELECTEDVALUE('Bibliotecas'[Código do Bairro]) RETURN IF(ISBLANK(CodigoBairro), BLANK(), CALCULATE(MAX('Bairros'[Renda Mediana do Responsável]), TREATAS({CodigoBairro}, 'Bairros'[Código do Bairro])))
 		formatString: R$ #,##0.00
 
 	column 'ID da Unidade'
