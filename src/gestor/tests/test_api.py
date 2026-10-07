@@ -1,3 +1,4 @@
+import base64
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -576,6 +577,20 @@ class GestorApiRegressionTests(APITestCase):
         public_client = APIClient()
         response = public_client.get("/gestor/analytics/powerbi/")
         self.assertEqual(response.status_code, 401)
+
+    def test_powerbi_dataset_accepts_http_basic_auth(self):
+        public_client = APIClient()
+        credentials = base64.b64encode(
+            b"gestor_teste:SenhaForte123!"
+        ).decode("ascii")
+        response = public_client.get(
+            "/gestor/analytics/powerbi/",
+            HTTP_AUTHORIZATION=f"Basic {credentials}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.data["meta"]["contem_dados_pessoais"])
+        self.assertEqual(len(response.data["dim_bairro"]), 70)
 
     @patch("gestor.presentation.views.TranslationService.translate_book_payload")
     @patch("gestor.presentation.views.OpenLibraryLookupService.lookup")
