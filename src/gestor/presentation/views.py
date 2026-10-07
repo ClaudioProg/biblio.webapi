@@ -32,7 +32,7 @@ from gestor.presentation.serializers import (
     EmprestimoSerializer,
 )
 from gestor.infrastructure.external_book_services import (
-    OpenLibraryLookupService,
+    BookMetadataLookupService,
     ExternalServiceError,
     InvalidIsbnError,
     IsbnNotFoundError,
@@ -644,7 +644,7 @@ def isbn_lookup(request):
         cached["meta"]["cache_hit"] = True
         return Response(cached)
 
-    lookup_service = OpenLibraryLookupService()
+    lookup_service = BookMetadataLookupService()
     translation_service = TranslationService()
 
     try:
@@ -661,7 +661,7 @@ def isbn_lookup(request):
     response_payload = {
         "data": translated_payload,
         "meta": {
-            "source": "openlibrary",
+            "source": base_payload.get("source", "unknown"),
             "translation_provider": translation_meta.get("provider", "none"),
             "translated_fields": translation_meta.get("translated_fields", []),
             "warnings": translation_meta.get("warnings", []),
