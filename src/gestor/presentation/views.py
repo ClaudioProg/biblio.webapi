@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.db.models.deletion import ProtectedError
 from django.core.cache import cache
 from django.conf import settings
-from django.contrib.auth import authenticate, update_session_auth_hash
+from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import viewsets, filters, permissions, status
