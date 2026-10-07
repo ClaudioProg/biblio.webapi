@@ -1,5 +1,6 @@
 # 📁 src/gestor/presentation/views.py
 from django.db.models import Q
+from django.db.models.deletion import ProtectedError
 from django.core.cache import cache
 from django.conf import settings
 from django.contrib.auth import authenticate
@@ -88,7 +89,23 @@ def auth_me(request):
 # ViewSets sem paginação (array puro) e autenticados
 # =========================================================
 
-class UnidadeViewSet(viewsets.ModelViewSet):
+class ProtectLoanHistoryMixin:
+    protected_error_message = (
+        "Este registro não pode ser excluído porque possui histórico de empréstimos. "
+        "Preserve o histórico e, quando aplicável, inative ou corrija o cadastro."
+    )
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            return Response(
+                {"detail": self.protected_error_message},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+
+class UnidadeViewSet(ProtectLoanHistoryMixin, viewsets.ModelViewSet):
     queryset = Unidade.objects.all().order_by("id")
     serializer_class = UnidadeSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -105,7 +122,7 @@ class UnidadeViewSet(viewsets.ModelViewSet):
         return Response(s.data)
 
 
-class UsuarioViewSet(viewsets.ModelViewSet):
+class UsuarioViewSet(ProtectLoanHistoryMixin, viewsets.ModelViewSet):
     queryset = Usuario.objects.all().order_by("id")
     serializer_class = UsuarioSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -172,6 +189,17 @@ class EmprestimoViewSet(viewsets.ModelViewSet):
         s = self.get_serializer(qs, many=True)
         return Response(s.data)
 
+    def destroy(self, request, *args, **kwargs):
+        return Response(
+            {
+                "detail": (
+                    "Empréstimos fazem parte do histórico de circulação e não podem "
+                    "ser excluídos. Corrija o registro ou finalize a devolução."
+                )
+            },
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
+
 
 class LivroUnidadeViewSet(viewsets.ModelViewSet):
     queryset = (
@@ -208,7 +236,7 @@ class LivroUnidadeViewSet(viewsets.ModelViewSet):
         return Response(s.data)
 
 
-class LivroViewSet(viewsets.ModelViewSet):
+class LivroViewSet(ProtectLoanHistoryMixin, viewsets.ModelViewSet):
     """
     GET /gestor/livros/?titulo=...&autor=...&tipo_obra=ID&editora=...&isbn=...&unidades=1,2
     Suporta também ?unidades=NOME_DA_UNIDADE (exato ou parcial).
