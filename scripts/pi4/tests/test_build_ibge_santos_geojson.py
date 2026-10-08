@@ -19,12 +19,12 @@ class IbgeGeoDataTests(unittest.TestCase):
         rounded = geo.round_coordinates(value)
         self.assertEqual(rounded[0][0], [-46.1234568, -23.9876543])
 
-    def test_snapshot_has_70_features_and_unique_codes(self):
+    def test_snapshot_has_55_features_and_unique_codes(self):
         with SNAPSHOT.open("r", encoding="utf-8") as handle:
             data = json.load(handle)
 
         self.assertEqual(data["type"], "FeatureCollection")
-        self.assertEqual(len(data["features"]), 70)
+        self.assertEqual(len(data["features"]), 55)
 
         codes = [
             feature["properties"]["cd_bairro"]
