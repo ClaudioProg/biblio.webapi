@@ -84,6 +84,50 @@ class GestorApiRegressionTests(APITestCase):
         self.assertEqual(response.data["user"]["username"], "gestor_teste")
         self.assertEqual(response.data["user"]["role"], "staff")
 
+    def test_login_reuses_single_existing_token(self):
+        public_client = APIClient()
+
+        first = public_client.post(
+            "/gestor/auth/login/",
+            {"username": "gestor_teste", "password": "SenhaForte123!"},
+            format="json",
+        )
+        second = public_client.post(
+            "/gestor/auth/login/",
+            {"username": "gestor_teste", "password": "SenhaForte123!"},
+            format="json",
+        )
+
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(second.status_code, 200)
+        self.assertEqual(first.data["token"], second.data["token"])
+        self.assertEqual(
+            Token.objects.filter(user=self.auth_user).count(),
+            1,
+        )
+
+    def test_login_recreates_token_after_password_reset_deleted_previous_token(self):
+        old_key = self.token.key
+        self.token.delete()
+        self.assertFalse(
+            Token.objects.filter(user=self.auth_user).exists()
+        )
+
+        public_client = APIClient()
+        response = public_client.post(
+            "/gestor/auth/login/",
+            {"username": "gestor_teste", "password": "SenhaForte123!"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["token"])
+        self.assertNotEqual(response.data["token"], old_key)
+        self.assertEqual(
+            Token.objects.filter(user=self.auth_user).count(),
+            1,
+        )
+
     def test_login_rejects_invalid_credentials(self):
         public_client = APIClient()
         response = public_client.post(
