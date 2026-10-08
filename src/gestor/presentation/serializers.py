@@ -366,9 +366,9 @@ class LivroUnidadeReadSerializer(serializers.ModelSerializer):
         ]
 
     def get_emprestimos_abertos(self, obj):
-        open_counts = self.context.get("open_counts") or {}
-        if obj.unidade_id in open_counts:
-            return int(open_counts[obj.unidade_id])
+        open_counts = self.context.get("open_counts")
+        if open_counts is not None:
+            return int(open_counts.get(obj.unidade_id, 0))
 
         return Emprestimo.objects.filter(
             livro=obj.livro,
@@ -526,7 +526,10 @@ class LivroSerializer(serializers.ModelSerializer):
                 LivroUnidade.objects.select_related("unidade").filter(livro=obj)
             )
 
-        open_counts = {}
+        open_counts = {
+            row.unidade_id: 0
+            for row in rows
+        }
         open_loans = getattr(obj, "_prefetched_open_loans", None)
         if open_loans is not None:
             for loan in open_loans:
