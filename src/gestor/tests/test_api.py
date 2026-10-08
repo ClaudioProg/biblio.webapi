@@ -2,6 +2,8 @@ import base64
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.contrib.auth.models import Group
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
@@ -420,6 +422,56 @@ class GestorApiRegressionTests(APITestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertIn("ibge_bairro_codigo", response.data)
+
+    def test_livro_list_avoids_n_plus_one_queries(self):
+        for index in range(20):
+            livro = Livro.objects.create(
+                titulo=f"Livro performance {index}",
+                autor="Autor",
+                isbn=f"9781234567{index:03d}",
+                genero=self.genero,
+                tipo_obra=self.tipo,
+            )
+            LivroUnidade.objects.create(
+                livro=livro,
+                unidade=self.unidade_a,
+                exemplares=2,
+            )
+            LivroUnidade.objects.create(
+                livro=livro,
+                unidade=self.unidade_b,
+                exemplares=1,
+            )
+
+        usuario = self._usuario("perf")
+        primeiro_livro = Livro.objects.order_by("id").first()
+        Emprestimo.objects.create(
+            livro=primeiro_livro,
+            unidade=self.unidade_a,
+            usuario=usuario,
+            data_emprestimo="2026-05-18",
+            status=Emprestimo.STATUS_ABERTO,
+        )
+
+        with CaptureQueriesContext(connection) as captured:
+            response = self.client.get("/gestor/livros/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 20)
+        self.assertLessEqual(
+            len(captured),
+            8,
+            f"Lista executou {len(captured)} queries; possível regressão N+1.",
+        )
+
+        first = response.data[0]
+        unidade_a = next(
+            item
+            for item in first["unidades_detalhe"]
+            if item["unidade"]["id"] == self.unidade_a.id
+        )
+        self.assertEqual(unidade_a["emprestimos_abertos"], 1)
+        self.assertEqual(unidade_a["exemplares_disponiveis"], 1)
 
     def test_livro_create_persists_unidades_and_exemplares(self):
         response = self.client.post(
