@@ -1,6 +1,6 @@
 let
     Registros = FontePowerBI[fato_devolucoes_mensal],
-    Tabela = Table.FromRecords(Registros),
+    Tabela = Table.FromRecords(Registros, {"mes", "unidade_id", "ibge_bairro_codigo", "genero", "tipo_obra", "devolucoes"}, MissingField.UseNull),
     Tipos = Table.TransformColumnTypes(
         Tabela,
         {
