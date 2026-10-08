@@ -298,20 +298,53 @@ def transform(
             }
         )
 
-    missing_income_codes = sorted(basic_codes - set(income))
+    confirmed_required_fields = [
+        "populacao_total",
+        "idade_0_14",
+        "idade_15_29",
+        "idade_30_59",
+        "idade_60_mais",
+        "taxa_alfabetizacao_15_mais_pct",
+        "renda_responsavel_mediana",
+    ]
+    confirmed = [
+        row
+        for row in result
+        if all(
+            row.get(field) not in (None, "")
+            for field in confirmed_required_fields
+        )
+    ]
+    confirmed_codes = {row["cd_bairro"] for row in confirmed}
+    excluded_codes = sorted(basic_codes - confirmed_codes)
+
+    population_mismatches = [
+        item
+        for item in population_mismatches
+        if item["cd_bairro"] in confirmed_codes
+    ]
+    age_total_differences = [
+        item
+        for item in age_total_differences
+        if item["cd_bairro"] in confirmed_codes
+    ]
+
     validation = {
         "municipio_ibge": MUNICIPALITY_CODE,
+        "source_bairros_total": len(basic),
         "bairros": {
-            "basic": len(basic),
-            "demography": len(demography),
-            "literacy": len(literacy),
-            "income": len(income),
+            "basic": len(confirmed),
+            "demography": len(confirmed),
+            "literacy": len(confirmed),
+            "income": len(confirmed),
         },
-        "missing_income_count": len(missing_income_codes),
-        "missing_income_neighborhoods": [
+        "excluded_unconfirmed_count": len(excluded_codes),
+        "excluded_unconfirmed_neighborhoods": [
             {"cd_bairro": code, "bairro": basic[code]["NM_BAIRRO"]}
-            for code in missing_income_codes
+            for code in excluded_codes
         ],
+        "missing_income_count": 0,
+        "missing_income_neighborhoods": [],
         "population_source_mismatch_count": len(population_mismatches),
         "population_source_mismatches": population_mismatches,
         "age_classified_total_difference_count": len(age_total_differences),
@@ -321,9 +354,11 @@ def transform(
             "incomplete_derived_group_becomes_null": True,
             "missing_income_becomes_zero": False,
             "literacy_rate_denominator": "population_15_plus_from_literacy_theme",
+            "only_confirmed_neighborhoods": True,
+            "confirmed_required_fields": confirmed_required_fields,
         },
     }
-    return result, validation
+    return confirmed, validation
 
 
 def load_remote_datasets(
@@ -427,15 +462,15 @@ def main() -> int:
     validate_mapped_columns(datasets, variable_map)
 
     rows, validation = transform(datasets, variable_map)
-    if len(rows) != 70:
+    if len(rows) != 55:
         raise EtlError(
-            f"Esperados 70 bairros na versão validada do recorte; encontrados {len(rows)}."
+            f"Esperados 55 bairros com indicadores confirmados; encontrados {len(rows)}."
         )
 
     write_outputs(rows, validation, args.output_dir)
     print(
-        f"OK: {len(rows)} bairros; "
-        f"{validation['missing_income_count']} sem renda publicada; "
+        f"OK: {len(rows)} bairros confirmados; "
+        f"{validation['excluded_unconfirmed_count']} excluídos por incompletude; "
         f"saída em {args.output_dir}"
     )
     return 0

@@ -2,75 +2,14 @@
   "generated_from_official_sources_on": "2026-10-07",
   "municipio_ibge": "3548500",
   "bairros": {
-    "basic": 70,
-    "demography": 70,
-    "literacy": 70,
+    "basic": 55,
+    "demography": 55,
+    "literacy": 55,
     "income": 55
   },
-  "missing_income_count": 15,
-  "missing_income_neighborhoods": [
-    {
-      "cd_bairro": "3548500031",
-      "bairro": "Porto Valongo"
-    },
-    {
-      "cd_bairro": "3548500032",
-      "bairro": "Porto Paquetá"
-    },
-    {
-      "cd_bairro": "3548500033",
-      "bairro": "Outeirinho"
-    },
-    {
-      "cd_bairro": "3548500038",
-      "bairro": "Porto Saboó"
-    },
-    {
-      "cd_bairro": "3548500047",
-      "bairro": "Morro Chico de Paula"
-    },
-    {
-      "cd_bairro": "3548500048",
-      "bairro": "Porto Alamoa"
-    },
-    {
-      "cd_bairro": "3548500049",
-      "bairro": "Porto Macuco"
-    },
-    {
-      "cd_bairro": "3548500053",
-      "bairro": "Morro Embaré"
-    },
-    {
-      "cd_bairro": "3548500055",
-      "bairro": "Porto Ponta da Praia"
-    },
-    {
-      "cd_bairro": "3548500058",
-      "bairro": "Trindade"
-    },
-    {
-      "cd_bairro": "3548500062",
-      "bairro": "Quilombo"
-    },
-    {
-      "cd_bairro": "3548500063",
-      "bairro": "Nossa Senhora das Neves"
-    },
-    {
-      "cd_bairro": "3548500064",
-      "bairro": "Ilha Barnabé"
-    },
-    {
-      "cd_bairro": "3548500069",
-      "bairro": "Piaçaguera"
-    },
-    {
-      "cd_bairro": "3548500070",
-      "bairro": "Bagres"
-    }
-  ],
-  "population_source_mismatch_count": 11,
+  "missing_income_count": 0,
+  "missing_income_neighborhoods": [],
+  "population_source_mismatch_count": 8,
   "population_source_mismatches": [
     {
       "cd_bairro": "3548500008",
@@ -119,24 +58,6 @@
       "bairro": "Morro Nova Cintra",
       "populacao_total": 7405,
       "populacao_demografia": 7338
-    },
-    {
-      "cd_bairro": "3548500047",
-      "bairro": "Morro Chico de Paula",
-      "populacao_total": 2,
-      "populacao_demografia": 0
-    },
-    {
-      "cd_bairro": "3548500058",
-      "bairro": "Trindade",
-      "populacao_total": 6,
-      "populacao_demografia": 0
-    },
-    {
-      "cd_bairro": "3548500063",
-      "bairro": "Nossa Senhora das Neves",
-      "populacao_total": 2,
-      "populacao_demografia": 0
     }
   ],
   "age_classified_total_difference_count": 22,
@@ -283,6 +204,80 @@
     ],
     "incomplete_derived_group_becomes_null": true,
     "missing_income_becomes_zero": false,
-    "literacy_rate_denominator": "population_15_plus_from_literacy_theme"
-  }
+    "literacy_rate_denominator": "population_15_plus_from_literacy_theme",
+    "only_confirmed_neighborhoods": true,
+    "confirmed_required_fields": [
+      "populacao_total",
+      "idade_0_14",
+      "idade_15_29",
+      "idade_30_59",
+      "idade_60_mais",
+      "taxa_alfabetizacao_15_mais_pct",
+      "renda_responsavel_mediana"
+    ]
+  },
+  "source_bairros_total": 70,
+  "excluded_unconfirmed_count": 15,
+  "excluded_unconfirmed_neighborhoods": [
+    {
+      "cd_bairro": "3548500031",
+      "bairro": "Porto Valongo"
+    },
+    {
+      "cd_bairro": "3548500032",
+      "bairro": "Porto Paquetá"
+    },
+    {
+      "cd_bairro": "3548500033",
+      "bairro": "Outeirinho"
+    },
+    {
+      "cd_bairro": "3548500038",
+      "bairro": "Porto Saboó"
+    },
+    {
+      "cd_bairro": "3548500047",
+      "bairro": "Morro Chico de Paula"
+    },
+    {
+      "cd_bairro": "3548500048",
+      "bairro": "Porto Alamoa"
+    },
+    {
+      "cd_bairro": "3548500049",
+      "bairro": "Porto Macuco"
+    },
+    {
+      "cd_bairro": "3548500053",
+      "bairro": "Morro Embaré"
+    },
+    {
+      "cd_bairro": "3548500055",
+      "bairro": "Porto Ponta da Praia"
+    },
+    {
+      "cd_bairro": "3548500058",
+      "bairro": "Trindade"
+    },
+    {
+      "cd_bairro": "3548500062",
+      "bairro": "Quilombo"
+    },
+    {
+      "cd_bairro": "3548500063",
+      "bairro": "Nossa Senhora das Neves"
+    },
+    {
+      "cd_bairro": "3548500064",
+      "bairro": "Ilha Barnabé"
+    },
+    {
+      "cd_bairro": "3548500069",
+      "bairro": "Piaçaguera"
+    },
+    {
+      "cd_bairro": "3548500070",
+      "bairro": "Bagres"
+    }
+  ]
 }
