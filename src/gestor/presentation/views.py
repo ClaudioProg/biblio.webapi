@@ -1,6 +1,6 @@
 # 📁 src/gestor/presentation/views.py
 from django.db import IntegrityError
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Prefetch, Q, Sum
 from django.db.models.deletion import ProtectedError
 from django.core.cache import cache
 from django.conf import settings
@@ -483,9 +483,23 @@ class LivroViewSet(ProtectLoanHistoryMixin, viewsets.ModelViewSet):
     ordering = ["id"]
 
     def get_queryset(self):
+        unidades_prefetch = Prefetch(
+            "livrounidade_set",
+            queryset=LivroUnidade.objects.select_related("unidade").order_by("id"),
+            to_attr="_prefetched_unidades",
+        )
+        open_loans_prefetch = Prefetch(
+            "emprestimo_set",
+            queryset=Emprestimo.objects.filter(
+                status=Emprestimo.STATUS_ABERTO
+            ).only("id", "livro_id", "unidade_id"),
+            to_attr="_prefetched_open_loans",
+        )
+
         qs = (
             Livro.objects.all()
-            .select_related("tipo_obra")
+            .select_related("tipo_obra", "genero")
+            .prefetch_related(unidades_prefetch, open_loans_prefetch)
             .order_by("id")
         )
 
