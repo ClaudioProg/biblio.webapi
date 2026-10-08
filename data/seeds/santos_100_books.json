@@ -1,0 +1,1002 @@
+[
+  {
+    "titulo": "Dom Casmurro",
+    "autor": "Machado de Assis",
+    "genero": "Clássico brasileiro",
+    "isbn": "9788500507007",
+    "editora": "Ediciones Cátedra",
+    "ano": 1900,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/647501-L.jpg"
+  },
+  {
+    "titulo": "Memórias Póstumas de Brás Cubas",
+    "autor": "Machado de Assis",
+    "genero": "Clássico brasileiro",
+    "isbn": "9788594318619",
+    "editora": "Editôra Cultrix",
+    "ano": 1881,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/123152-L.jpg"
+  },
+  {
+    "titulo": "Quincas Borba",
+    "autor": "Machado de Assis",
+    "genero": "Clássico brasileiro",
+    "isbn": "9788563560520",
+    "editora": "Independently Published",
+    "ano": 1899,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/123420-L.jpg"
+  },
+  {
+    "titulo": "Iracema",
+    "autor": "José de Alencar",
+    "genero": "Clássico brasileiro",
+    "isbn": "9788582850336",
+    "editora": "Impr. Nacional",
+    "ano": 1886,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/2664651-L.jpg"
+  },
+  {
+    "titulo": "Senhora",
+    "autor": "José de Alencar",
+    "genero": "Clássico brasileiro",
+    "isbn": "9788580865912",
+    "editora": "Livros Técnicos e Científicos",
+    "ano": 1900,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/5050225-L.jpg"
+  },
+  {
+    "titulo": "Vidas Secas",
+    "autor": "Graciliano Ramos",
+    "genero": "Clássico brasileiro",
+    "isbn": "9788501114785",
+    "editora": "BTFDREEM",
+    "ano": 1986,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/14158825-L.jpg"
+  },
+  {
+    "titulo": "São Bernardo",
+    "autor": "Graciliano Ramos",
+    "genero": "Clássico brasileiro",
+    "isbn": "9780800869915",
+    "editora": "Taplinger Pub. Co.",
+    "ano": 1965,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/4461279-L.jpg"
+  },
+  {
+    "titulo": "Capitães da Areia",
+    "autor": "Jorge Amado",
+    "genero": "Clássico brasileiro",
+    "isbn": "9788510053068",
+    "editora": "Martins",
+    "ano": 1937,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/4178919-L.jpg"
+  },
+  {
+    "titulo": "Gabriela, Cravo e Canela",
+    "autor": "Jorge Amado",
+    "genero": "Clássico brasileiro",
+    "isbn": "9788501005366",
+    "editora": "Editorial Losada",
+    "ano": 1962,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/6980354-L.jpg"
+  },
+  {
+    "titulo": "A Hora da Estrela",
+    "autor": "Clarice Lispector",
+    "genero": "Clássico brasileiro",
+    "isbn": "9788526502093",
+    "editora": "Norton & Company Limited, W. W.",
+    "ano": 1977,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/650866-L.jpg"
+  },
+  {
+    "titulo": "Laços de Família",
+    "autor": "Clarice Lispector",
+    "genero": "Contos",
+    "isbn": "9789895891344",
+    "editora": "",
+    "ano": 2026,
+    "idioma": "Português",
+    "capa": ""
+  },
+  {
+    "titulo": "Sagarana",
+    "autor": "João Guimarães Rosa",
+    "genero": "Contos",
+    "isbn": "9788520919217",
+    "editora": "J. Olympio",
+    "ano": 1958,
+    "idioma": "Português",
+    "capa": ""
+  },
+  {
+    "titulo": "A Moreninha",
+    "autor": "Joaquim Manuel de Macedo",
+    "genero": "Clássico brasileiro",
+    "isbn": "9788508043101",
+    "editora": "Ed. Melhoramentos",
+    "ano": 1924,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/15203760-L.jpg"
+  },
+  {
+    "titulo": "O Ateneu",
+    "autor": "Raul Pompeia",
+    "genero": "Clássico brasileiro",
+    "isbn": "9788533903708",
+    "editora": "Ateliê",
+    "ano": 1900,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/12039898-L.jpg"
+  },
+  {
+    "titulo": "Triste Fim de Policarpo Quaresma",
+    "autor": "Lima Barreto",
+    "genero": "Clássico brasileiro",
+    "isbn": "9786586490237",
+    "editora": "Brasiliense",
+    "ano": 1965,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/5459319-L.jpg"
+  },
+  {
+    "titulo": "Ponciá Vicêncio",
+    "autor": "Conceição Evaristo",
+    "genero": "Literatura brasileira",
+    "isbn": "9780924047343",
+    "editora": "Host Publications",
+    "ano": 2007,
+    "idioma": "English",
+    "capa": "https://covers.openlibrary.org/b/id/1671900-L.jpg"
+  },
+  {
+    "titulo": "Olhos d'Água",
+    "autor": "Conceição Evaristo",
+    "genero": "Contos",
+    "isbn": "9788534705257",
+    "editora": "Pallas Edição",
+    "ano": 2014,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/10833000-L.jpg"
+  },
+  {
+    "titulo": "Torto Arado",
+    "autor": "Itamar Vieira Junior",
+    "genero": "Literatura brasileira",
+    "isbn": "9786580309313",
+    "editora": "Todavia",
+    "ano": 2019,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/12369648-L.jpg"
+  },
+  {
+    "titulo": "Tudo é Rio",
+    "autor": "Carla Madeira",
+    "genero": "Romance",
+    "isbn": "9786555871784",
+    "editora": "Record",
+    "ano": 1988,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/14631316-L.jpg"
+  },
+  {
+    "titulo": "Nove Noites",
+    "autor": "Bernardo Carvalho",
+    "genero": "Literatura brasileira",
+    "isbn": "9788535908619",
+    "editora": "Companhia de Bolso",
+    "ano": 2006,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8700716-L.jpg"
+  },
+  {
+    "titulo": "O Avesso da Pele",
+    "autor": "Jeferson Tenório",
+    "genero": "Literatura brasileira",
+    "isbn": "9788535933390",
+    "editora": "Companhia das Letras",
+    "ano": 2020,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/12769862-L.jpg"
+  },
+  {
+    "titulo": "A Cabeça do Santo",
+    "autor": "Socorro Acioli",
+    "genero": "Literatura brasileira",
+    "isbn": "9788535923698",
+    "editora": "Delacorte Press",
+    "ano": 2014,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/10373791-L.jpg"
+  },
+  {
+    "titulo": "Dois Irmãos",
+    "autor": "Milton Hatoum",
+    "genero": "Literatura brasileira",
+    "isbn": "9788535900132",
+    "editora": "Companhia das Letras",
+    "ano": 2000,
+    "idioma": "English",
+    "capa": "https://covers.openlibrary.org/b/id/1391060-L.jpg"
+  },
+  {
+    "titulo": "Niketche",
+    "autor": "Paulina Chiziane",
+    "genero": "Literatura africana",
+    "isbn": "9788535904710",
+    "editora": "La Nuova Frontiera",
+    "ano": 2002,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/6980104-L.jpg"
+  },
+  {
+    "titulo": "Ensaio sobre a Cegueira",
+    "autor": "José Saramago",
+    "genero": "Ficção",
+    "isbn": "9788571644953",
+    "editora": "Haenaem",
+    "ano": 1995,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/10482411-L.jpg"
+  },
+  {
+    "titulo": "O Evangelho Segundo Jesus Cristo",
+    "autor": "José Saramago",
+    "genero": "Ficção",
+    "isbn": "9780156001410",
+    "editora": "Harcourt Trade Publishers",
+    "ano": 1994,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/7427765-L.jpg"
+  },
+  {
+    "titulo": "O Pequeno Príncipe",
+    "autor": "Antoine de Saint-Exupéry",
+    "genero": "Infantojuvenil",
+    "isbn": "9786559570737",
+    "editora": "Prime",
+    "ano": 2020,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/15231561-L.jpg"
+  },
+  {
+    "titulo": "A Revolução dos Bichos",
+    "autor": "George Orwell",
+    "genero": "Sátira",
+    "isbn": "9786555790641",
+    "editora": "PandorgA",
+    "ano": 2020,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/15200524-L.jpg"
+  },
+  {
+    "titulo": "Admirável Mundo Novo",
+    "autor": "Aldous Huxley",
+    "genero": "Distopia",
+    "isbn": "9788525033222",
+    "editora": "Globo",
+    "ano": 2001,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/13623695-L.jpg"
+  },
+  {
+    "titulo": "Fahrenheit 451",
+    "autor": "Ray Bradbury",
+    "genero": "Ficção científica",
+    "isbn": "9788525057501",
+    "editora": "Diogenes Verlag AG",
+    "ano": 1953,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/12993656-L.jpg"
+  },
+  {
+    "titulo": "Fundação",
+    "autor": "Isaac Asimov",
+    "genero": "Ficção científica",
+    "isbn": "9789897731426",
+    "editora": "Saída de Emergência",
+    "ano": 2019,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/15111026-L.jpg"
+  },
+  {
+    "titulo": "Eu, Robô",
+    "autor": "Isaac Asimov",
+    "genero": "Ficção científica",
+    "isbn": "9788500015298",
+    "editora": "Ediouro",
+    "ano": 2004,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/5278331-L.jpg"
+  },
+  {
+    "titulo": "Neuromancer",
+    "autor": "William Gibson",
+    "genero": "Ficção científica",
+    "isbn": "9788576571919",
+    "editora": "J'ai Lu",
+    "ano": 1984,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/283860-L.jpg"
+  },
+  {
+    "titulo": "Flores para Algernon",
+    "autor": "Daniel Keyes",
+    "genero": "Ficção científica",
+    "isbn": "9788467511468",
+    "editora": "EDICIONES SM",
+    "ano": 2006,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/13678348-L.jpg"
+  },
+  {
+    "titulo": "Frankenstein",
+    "autor": "Mary Shelley",
+    "genero": "Terror",
+    "isbn": "9788594540188",
+    "editora": "Independently Published",
+    "ano": 2017,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/15118068-L.jpg"
+  },
+  {
+    "titulo": "Drácula",
+    "autor": "Bram Stoker",
+    "genero": "Terror",
+    "isbn": "9788566636239",
+    "editora": "Charles E. Tuttle",
+    "ano": 1897,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/12216503-L.jpg"
+  },
+  {
+    "titulo": "O Iluminado",
+    "autor": "Stephen King",
+    "genero": "Terror",
+    "isbn": "9788581050485",
+    "editora": "Suma de Letras",
+    "ano": 2012,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/10328353-L.jpg"
+  },
+  {
+    "titulo": "It",
+    "autor": "Stephen King",
+    "genero": "Terror",
+    "isbn": "9788560280940",
+    "editora": "Overlook Connection Press",
+    "ano": 1986,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8569284-L.jpg"
+  },
+  {
+    "titulo": "Misery",
+    "autor": "Stephen King",
+    "genero": "Suspense",
+    "isbn": "9788581052144",
+    "editora": "Knopf Doubleday Publishing Group",
+    "ano": 1978,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8259296-L.jpg"
+  },
+  {
+    "titulo": "O Hobbit",
+    "autor": "J. R. R. Tolkien",
+    "genero": "Fantasia",
+    "isbn": "9788533615540",
+    "editora": "WMF Martins Fontes",
+    "ano": null,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/15121777-L.jpg"
+  },
+  {
+    "titulo": "Harry Potter e o Prisioneiro de Azkaban",
+    "autor": "J. K. Rowling",
+    "genero": "Fantasia",
+    "isbn": "9789722365611",
+    "editora": "Editorial Presença",
+    "ano": 2020,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/14844152-L.jpg"
+  },
+  {
+    "titulo": "As Crônicas de Nárnia",
+    "autor": "C. S. Lewis",
+    "genero": "Fantasia",
+    "isbn": "9788533622104",
+    "editora": "Martins Fontes",
+    "ano": 2005,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/12749826-L.jpg"
+  },
+  {
+    "titulo": "A Guerra dos Tronos",
+    "autor": "George R. R. Martin",
+    "genero": "Fantasia",
+    "isbn": "9789896375393",
+    "editora": "Saída de Emergência",
+    "ano": 2013,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/14317364-L.jpg"
+  },
+  {
+    "titulo": "Divergente",
+    "autor": "Veronica Roth",
+    "genero": "Distopia",
+    "isbn": "9786074009842",
+    "editora": "Océano El lado oscuro",
+    "ano": 2013,
+    "idioma": "",
+    "capa": ""
+  },
+  {
+    "titulo": "Orgulho e Preconceito",
+    "autor": "Jane Austen",
+    "genero": "Romance",
+    "isbn": "9798803345671",
+    "editora": "Independently Published",
+    "ano": 2022,
+    "idioma": "Português",
+    "capa": ""
+  },
+  {
+    "titulo": "Razão e Sensibilidade",
+    "autor": "Jane Austen",
+    "genero": "Romance",
+    "isbn": "9788563560490",
+    "editora": "Penguin",
+    "ano": 2012,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/12372639-L.jpg"
+  },
+  {
+    "titulo": "Jane Eyre",
+    "autor": "Charlotte Brontë",
+    "genero": "Romance",
+    "isbn": "9798518833760",
+    "editora": "IndoEuropeanPublishing.com",
+    "ano": 1847,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8235363-L.jpg"
+  },
+  {
+    "titulo": "Anna Karenina",
+    "autor": "Leo Tolstoy",
+    "genero": "Clássico",
+    "isbn": "9783734508653",
+    "editora": "tredition Verlag",
+    "ano": 2016,
+    "idioma": "",
+    "capa": ""
+  },
+  {
+    "titulo": "Guerra e Paz",
+    "autor": "Leo Tolstoy",
+    "genero": "Clássico",
+    "isbn": "9798788802084",
+    "editora": "Independently Published",
+    "ano": 2021,
+    "idioma": "Português",
+    "capa": ""
+  },
+  {
+    "titulo": "O Idiota",
+    "autor": "Fyodor Dostoevsky",
+    "genero": "Clássico",
+    "isbn": "9788544001882",
+    "editora": "Martin Claret",
+    "ano": null,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/12370540-L.jpg"
+  },
+  {
+    "titulo": "O Processo",
+    "autor": "Franz Kafka",
+    "genero": "Clássico",
+    "isbn": "9789726115984",
+    "editora": "Biblioteca Visão",
+    "ano": 2000,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/15111337-L.jpg"
+  },
+  {
+    "titulo": "A Metamorfose",
+    "autor": "Franz Kafka",
+    "genero": "Clássico",
+    "isbn": "9786587435725",
+    "editora": "Livros do Brasil",
+    "ano": 2017,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/13219431-L.jpg"
+  },
+  {
+    "titulo": "Ulisses",
+    "autor": "James Joyce",
+    "genero": "Clássico",
+    "isbn": "9788366511958",
+    "editora": "Oficyna",
+    "ano": 2021,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/14552535-L.jpg"
+  },
+  {
+    "titulo": "O Sol é para Todos",
+    "autor": "Harper Lee",
+    "genero": "Clássico",
+    "isbn": "9788503013727",
+    "editora": "Editora",
+    "ano": 2019,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/12394034-L.jpg"
+  },
+  {
+    "titulo": "Moby Dick",
+    "autor": "Herman Melville",
+    "genero": "Clássico",
+    "isbn": "9788575036709",
+    "editora": "Mladinska Knjiga",
+    "ano": 1851,
+    "idioma": "English",
+    "capa": "https://covers.openlibrary.org/b/id/10544254-L.jpg"
+  },
+  {
+    "titulo": "Huckleberry Finn",
+    "autor": "Mark Twain",
+    "genero": "Clássico",
+    "isbn": "9788500782626",
+    "editora": "Spencer Press, Inc.",
+    "ano": 1876,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8157718-L.jpg"
+  },
+  {
+    "titulo": "Alice no País das Maravilhas",
+    "autor": "Lewis Carroll",
+    "genero": "Infantojuvenil",
+    "isbn": "9788538083726",
+    "editora": "Ciranda Cultural",
+    "ano": 2019,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/12460373-L.jpg"
+  },
+  {
+    "titulo": "O Mágico de Oz",
+    "autor": "L. Frank Baum",
+    "genero": "Infantojuvenil",
+    "isbn": "9798596938937",
+    "editora": "Independently Published",
+    "ano": 2021,
+    "idioma": "Português",
+    "capa": ""
+  },
+  {
+    "titulo": "Matilda",
+    "autor": "Roald Dahl",
+    "genero": "Infantojuvenil",
+    "isbn": "9788533610149",
+    "editora": "PENGUIN",
+    "ano": 1988,
+    "idioma": "English",
+    "capa": "https://covers.openlibrary.org/b/id/12889769-L.jpg"
+  },
+  {
+    "titulo": "Beloved",
+    "autor": "Toni Morrison",
+    "genero": "Ficção",
+    "isbn": "9788535910698",
+    "editora": "ALfred A. Knopf",
+    "ano": 1987,
+    "idioma": "English",
+    "capa": "https://covers.openlibrary.org/b/id/8261367-L.jpg"
+  },
+  {
+    "titulo": "Americanah",
+    "autor": "Chimamanda Ngozi Adichie",
+    "genero": "Ficção",
+    "isbn": "9788535924732",
+    "editora": "fanbooks",
+    "ano": 1969,
+    "idioma": "English",
+    "capa": "https://covers.openlibrary.org/b/id/8474037-L.jpg"
+  },
+  {
+    "titulo": "Pachinko",
+    "autor": "Min Jin Lee",
+    "genero": "Ficção histórica",
+    "isbn": "9781786691378",
+    "editora": "Hachette Nashville",
+    "ano": 2017,
+    "idioma": "English",
+    "capa": "https://covers.openlibrary.org/b/id/8044605-L.jpg"
+  },
+  {
+    "titulo": "Norwegian Wood",
+    "autor": "Haruki Murakami",
+    "genero": "Romance",
+    "isbn": "9788573025972",
+    "editora": "Kodansha International",
+    "ano": 1987,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/2237620-L.jpg"
+  },
+  {
+    "titulo": "O Deus das Pequenas Coisas",
+    "autor": "Arundhati Roy",
+    "genero": "Ficção",
+    "isbn": "9788571648081",
+    "editora": "Kalandraka",
+    "ano": 1998,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/14458000-L.jpg"
+  },
+  {
+    "titulo": "Um Estudo em Vermelho",
+    "autor": "Arthur Conan Doyle",
+    "genero": "Mistério",
+    "isbn": "9788537810873",
+    "editora": "Zahar",
+    "ano": 2013,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/13845832-L.jpg"
+  },
+  {
+    "titulo": "A Sombra do Vento",
+    "autor": "Carlos Ruiz Zafón",
+    "genero": "Mistério",
+    "isbn": "9788556510341",
+    "editora": "Suma",
+    "ano": null,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/14032588-L.jpg"
+  },
+  {
+    "titulo": "O Alquimista",
+    "autor": "Paulo Coelho",
+    "genero": "Ficção",
+    "isbn": "9788576651857",
+    "editora": "HarperCollins Publishers",
+    "ano": 1988,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/7414780-L.jpg"
+  },
+  {
+    "titulo": "Veronika Decide Morrer",
+    "autor": "Paulo Coelho",
+    "genero": "Ficção",
+    "isbn": "9788576651963",
+    "editora": "Keter",
+    "ano": 1998,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/6421209-L.jpg"
+  },
+  {
+    "titulo": "Onze Minutos",
+    "autor": "Paulo Coelho",
+    "genero": "Romance",
+    "isbn": "9788532515360",
+    "editora": "Rocco",
+    "ano": 2003,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8317096-L.jpg"
+  },
+  {
+    "titulo": "Como Eu Era Antes de Você",
+    "autor": "Jojo Moyes",
+    "genero": "Romance",
+    "isbn": "9788580573299",
+    "editora": "Intrinseca",
+    "ano": 2013,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/12388031-L.jpg"
+  },
+  {
+    "titulo": "Sapiens",
+    "autor": "Yuval Noah Harari",
+    "genero": "Não ficção",
+    "isbn": "9786559213016",
+    "editora": "Blackstone Pub",
+    "ano": 2011,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8634250-L.jpg"
+  },
+  {
+    "titulo": "Homo Deus",
+    "autor": "Yuval Noah Harari",
+    "genero": "Não ficção",
+    "isbn": "9781784703936",
+    "editora": "Vintage",
+    "ano": 2017,
+    "idioma": "English",
+    "capa": "https://covers.openlibrary.org/b/id/15174691-L.jpg"
+  },
+  {
+    "titulo": "Cosmos",
+    "autor": "Carl Sagan",
+    "genero": "Ciência",
+    "isbn": "9788531903205",
+    "editora": "Amfora",
+    "ano": 1980,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8283901-L.jpg"
+  },
+  {
+    "titulo": "Rápido e Devagar",
+    "autor": "Daniel Kahneman",
+    "genero": "Psicologia",
+    "isbn": "9788539003839",
+    "editora": "Objetiva",
+    "ano": 2012,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/15120821-L.jpg"
+  },
+  {
+    "titulo": "Mindset",
+    "autor": "Carol Dweck",
+    "genero": "Psicologia",
+    "isbn": "9788547000240",
+    "editora": "Da kuai wen hua chu ban gu fen yu xian gong si",
+    "ano": 2006,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/746414-L.jpg"
+  },
+  {
+    "titulo": "Essencialismo",
+    "autor": "Greg McKeown",
+    "genero": "Desenvolvimento pessoal",
+    "isbn": "9788543102146",
+    "editora": "Editora Sextante",
+    "ano": 2015,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/10401970-L.jpg"
+  },
+  {
+    "titulo": "A Arte da Guerra",
+    "autor": "Sun Tzu",
+    "genero": "Estratégia",
+    "isbn": "9789897401633",
+    "editora": "Porto Editora",
+    "ano": 2022,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/15111161-L.jpg"
+  },
+  {
+    "titulo": "Meditações",
+    "autor": "Marco Aurélio",
+    "genero": "Filosofia",
+    "isbn": "9786587885339",
+    "editora": "? Temporalis",
+    "ano": 2021,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/13264786-L.jpg"
+  },
+  {
+    "titulo": "O Mundo de Sofia",
+    "autor": "Jostein Gaarder",
+    "genero": "Filosofia",
+    "isbn": "9788571644755",
+    "editora": "Companhia das Letras",
+    "ano": 1995,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/9046999-L.jpg"
+  },
+  {
+    "titulo": "O Segundo Sexo",
+    "autor": "Simone de Beauvoir",
+    "genero": "Filosofia",
+    "isbn": "9788520922590",
+    "editora": "Nova Fronteira",
+    "ano": 2016,
+    "idioma": "",
+    "capa": "https://covers.openlibrary.org/b/id/15200479-L.jpg"
+  },
+  {
+    "titulo": "Quarto de Despejo",
+    "autor": "Carolina Maria de Jesus",
+    "genero": "Memórias",
+    "isbn": "9788508105311",
+    "editora": "Ática",
+    "ano": 1960,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/295782-L.jpg"
+  },
+  {
+    "titulo": "Racismo Estrutural",
+    "autor": "Silvio Almeida",
+    "genero": "Ciências sociais",
+    "isbn": "9788598349749",
+    "editora": "Pólen",
+    "ano": 2019,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/13221281-L.jpg"
+  },
+  {
+    "titulo": "The Great Gatsby",
+    "autor": "F. Scott Fitzgerald",
+    "genero": "Clássico",
+    "isbn": "9788564406667",
+    "editora": "Ren Kitap",
+    "ano": 1920,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/10590366-L.jpg"
+  },
+  {
+    "titulo": "To Kill a Mockingbird",
+    "autor": "Harper Lee",
+    "genero": "Clássico",
+    "isbn": "9788503009492",
+    "editora": "HarperCollinsPublishers",
+    "ano": 1960,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/14351077-L.jpg"
+  },
+  {
+    "titulo": "The Catcher in the Rye",
+    "autor": "J. D. Salinger",
+    "genero": "Clássico",
+    "isbn": "9788587575012",
+    "editora": "Sudamericana",
+    "ano": 1945,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/9273490-L.jpg"
+  },
+  {
+    "titulo": "The Grapes of Wrath",
+    "autor": "John Steinbeck",
+    "genero": "Clássico",
+    "isbn": "9788577990467",
+    "editora": "International Collectors Library",
+    "ano": 1939,
+    "idioma": "English",
+    "capa": "https://covers.openlibrary.org/b/id/12715902-L.jpg"
+  },
+  {
+    "titulo": "Of Mice and Men",
+    "autor": "John Steinbeck",
+    "genero": "Clássico",
+    "isbn": "9788525427991",
+    "editora": "Aims Intl Books Corp",
+    "ano": 1937,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/14319003-L.jpg"
+  },
+  {
+    "titulo": "The Handmaid's Tale",
+    "autor": "Margaret Atwood",
+    "genero": "Distopia",
+    "isbn": "9788532520661",
+    "editora": "Jonathan Cape",
+    "ano": 1985,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8231851-L.jpg"
+  },
+  {
+    "titulo": "The Book Thief",
+    "autor": "Markus Zusak",
+    "genero": "Ficção histórica",
+    "isbn": "9788580570182",
+    "editora": "Nan hai chu ban she",
+    "ano": 1998,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8153054-L.jpg"
+  },
+  {
+    "titulo": "The Kite Runner",
+    "autor": "Khaled Hosseini",
+    "genero": "Ficção",
+    "isbn": "9788520917671",
+    "editora": "Berliner Taschenbuch Verlag",
+    "ano": 2003,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/14846827-L.jpg"
+  },
+  {
+    "titulo": "A Thousand Splendid Suns",
+    "autor": "Khaled Hosseini",
+    "genero": "Ficção",
+    "isbn": "9788520920107",
+    "editora": "Belfond, Editions",
+    "ano": 2007,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8579790-L.jpg"
+  },
+  {
+    "titulo": "The Color Purple",
+    "autor": "Alice Walker",
+    "genero": "Ficção",
+    "isbn": "9788503010313",
+    "editora": "Penguin Publishing Group",
+    "ano": 1976,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8564628-L.jpg"
+  },
+  {
+    "titulo": "Half of a Yellow Sun",
+    "autor": "Chimamanda Ngozi Adichie",
+    "genero": "Ficção histórica",
+    "isbn": "9788535912470",
+    "editora": "HarperCollins Publishers",
+    "ano": 2006,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8472660-L.jpg"
+  },
+  {
+    "titulo": "The Da Vinci Code",
+    "autor": "Dan Brown",
+    "genero": "Suspense",
+    "isbn": "9788599296127",
+    "editora": "Random House Publishing Group",
+    "ano": 2003,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/9255229-L.jpg"
+  },
+  {
+    "titulo": "The Silence of the Lambs",
+    "autor": "Thomas Harris",
+    "genero": "Suspense",
+    "isbn": "9788497599368",
+    "editora": "St Martins Press Inc  (M/M)",
+    "ano": 1988,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/8580475-L.jpg"
+  },
+  {
+    "titulo": "Gone Girl",
+    "autor": "Gillian Flynn",
+    "genero": "Suspense",
+    "isbn": "9788580572902",
+    "editora": "G+JGruner+Jahr Polska",
+    "ano": 2011,
+    "idioma": "English",
+    "capa": "https://covers.openlibrary.org/b/id/8368314-L.jpg"
+  },
+  {
+    "titulo": "The Silent Patient",
+    "autor": "Alex Michaelides",
+    "genero": "Suspense",
+    "isbn": "9788501116437",
+    "editora": "Droemer eBook",
+    "ano": 2018,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/9407338-L.jpg"
+  },
+  {
+    "titulo": "Murder on the Orient Express",
+    "autor": "Agatha Christie",
+    "genero": "Mistério",
+    "isbn": "9788595086784",
+    "editora": "Librairie des Champs-Elysses",
+    "ano": 1933,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/11100465-L.jpg"
+  },
+  {
+    "titulo": "And Then There Were None",
+    "autor": "Agatha Christie",
+    "genero": "Mistério",
+    "isbn": "9786559870332",
+    "editora": "Agatha Christie Ltd",
+    "ano": 1939,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/11172296-L.jpg"
+  },
+  {
+    "titulo": "The Murder of Roger Ackroyd",
+    "autor": "Agatha Christie",
+    "genero": "Mistério",
+    "isbn": "9788525028198",
+    "editora": "Editora Globo",
+    "ano": 1926,
+    "idioma": "Português",
+    "capa": "https://covers.openlibrary.org/b/id/13151356-L.jpg"
+  }
+]
