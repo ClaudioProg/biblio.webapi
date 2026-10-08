@@ -1,4 +1,5 @@
 # 📁 src/gestor/presentation/views.py
+from django.db import IntegrityError
 from django.db.models import Count, Q, Sum
 from django.db.models.deletion import ProtectedError
 from django.core.cache import cache
@@ -184,6 +185,23 @@ class AccessAccountViewSet(viewsets.ModelViewSet):
         })
 
 
+def get_or_repair_auth_token(user):
+    queryset = Token.objects.filter(user=user).order_by("created", "key")
+    token = queryset.first()
+
+    if token is not None:
+        queryset.exclude(pk=token.pk).delete()
+        return token
+
+    try:
+        return Token.objects.create(user=user)
+    except IntegrityError:
+        token = Token.objects.filter(user=user).order_by("created", "key").first()
+        if token is None:
+            raise
+        return token
+
+
 @api_view(["POST"])
 @permission_classes([permissions.AllowAny])
 def auth_login(request):
@@ -209,7 +227,7 @@ def auth_login(request):
             status=status.HTTP_403_FORBIDDEN,
         )
 
-    token, _ = Token.objects.get_or_create(user=user)
+    token = get_or_repair_auth_token(user)
     role = "admin" if user.is_superuser else ("staff" if user.is_staff else "usuario")
 
     return Response({
