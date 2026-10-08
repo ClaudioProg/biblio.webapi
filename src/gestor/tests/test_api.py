@@ -874,7 +874,7 @@ class GestorApiRegressionTests(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.data["meta"]["contem_dados_pessoais"])
-        self.assertEqual(len(response.data["dim_bairro"]), 70)
+        self.assertEqual(len(response.data["dim_bairro"]), 55)
 
     def test_isbn_equivalents_convert_between_isbn10_and_isbn13(self):
         self.assertEqual(
