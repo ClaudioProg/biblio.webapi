@@ -1,6 +1,6 @@
 # PI4 — Inventário de fontes IBGE para Acervo e Território
 
-Atualização: 07/10/2026  
+Atualização: 08/10/2026  
 Município de referência: Santos/SP — código IBGE 3548500.
 
 ## 1. Decisão de recorte territorial
@@ -84,12 +84,14 @@ neste dicionário.
 Produto oficial:
 Censo Demográfico 2022 — Malha de Setores Censitários / Arquivo geoespacial de Bairros.
 
-Uso previsto:
-- mapa de Santos;
-- ligação espacial das métricas do IBGE ao bairro;
-- futura análise de área de abrangência da Biblioteca Municipal Mário Faria.
+Uso implementado/disponível:
+- mapa de Santos no Power BI por bairro;
+- ligação das métricas do IBGE ao recorte territorial;
+- GeoJSON oficial versionado para refinamento geoespacial.
 
-Preferir GPKG/SHP oficial. Não desenhar polígonos manualmente.
+Na versão publicada em 08/10/2026, o Azure Maps utiliza bolhas georreferenciadas por bairro e dimensionadas pela população. O GeoJSON oficial permanece preparado para uma futura representação poligonal, mas a camada de polígonos não está ativa no relatório publicado.
+
+Preferir GPKG/SHP/GeoJSON derivado da malha oficial. Não desenhar polígonos manualmente.
 
 ## 3. Educação: decisão metodológica
 
@@ -133,14 +135,25 @@ O cruzamento IBGE × acervo será descritivo. Dados sociodemográficos caracteri
 território; não constituem prova de preferência literária nem permitem inferir automaticamente
 “demanda” por gênero ou título.
 
-## 6. Ordem de implementação
+## 6. Status de implementação — 08/10/2026
 
-1. baixar e registrar as quatro bases oficiais;
-2. conferir o dicionário e selecionar apenas variáveis necessárias;
-3. filtrar Santos;
-4. produzir uma tabela analítica única por bairro;
-5. validar totais contra publicações oficiais;
-6. incorporar a tabela tratada ao modelo do Power BI;
-7. integrar a visualização na rota Dashboard;
-8. validar com a Biblioteca Mário Faria;
-9. documentar testes, limitações e feedback no relatório final.
+Concluído:
+
+1. download e registro das bases oficiais selecionadas;
+2. conferência dos dicionários e seleção das variáveis utilizadas;
+3. filtro de Santos/SP;
+4. consolidação do recorte confirmado de 55 bairros;
+5. validação e documentação das diferenças entre universos estatísticos;
+6. geração da tabela analítica territorial;
+7. geração e validação do GeoJSON oficial dos 55 bairros;
+8. incorporação dos dados territoriais ao modelo do Power BI;
+9. publicação das cinco páginas do relatório no Power BI Service;
+10. integração segura do relatório à rota Dashboard da aplicação.
+
+Pendente para o fechamento acadêmico:
+
+- registrar o feedback final da Biblioteca Municipal Mário Faria;
+- anexar ao relatório final as evidências/capturas dos testes e da integração;
+- verificar e registrar a atualização automática do modelo semântico no Power BI Service.
+
+O cruzamento IBGE × acervo permanece estritamente descritivo, conforme as regras metodológicas deste inventário.
