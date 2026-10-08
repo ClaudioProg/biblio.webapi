@@ -1,200 +1,235 @@
 # Power BI — Bibliotecas Conectadas — PI4
 
-Este diretório contém o pacote de modelagem para o painel analítico do Projeto
-Integrador IV.
+Documentação do painel analítico do Projeto Integrador IV — Ciências da Computação (UNIVESP).
 
-A fonte é o endpoint autenticado:
+## Status atual — 08/10/2026
+
+O painel está:
+
+- modelado em projeto PBIP versionado no repositório;
+- conectado ao endpoint analítico autenticado da API;
+- composto por cinco páginas;
+- validado no Power BI Desktop;
+- publicado no Power BI Service;
+- incorporado ao Dashboard da aplicação pela opção segura **Site ou portal**;
+- utilizando o recorte territorial confirmado de 55 bairros de Santos/SP.
+
+A incorporação segura pode exigir autenticação Microsoft/Power BI e depende de licença/capacidade compatível no tenant utilizado.
+
+## 1. Fonte de dados
+
+Endpoint:
 
 `https://biblio-webapi.onrender.com/gestor/analytics/powerbi/`
 
-O endpoint retorna somente dados agregados e metadados de acervo, circulação e
-território. Não inclui nome, e-mail, documento ou qualquer outro identificador
-de leitores.
+O endpoint retorna somente dados agregados de:
 
-## 1. Conexão
+- acervo;
+- circulação;
+- bibliotecas;
+- território;
+- qualidade das fontes do IBGE.
+
+Não contém nome, e-mail, documento ou outro identificador pessoal de leitores.
+
+## 2. Autenticação da fonte
 
 No Power BI Desktop:
 
-1. Obter dados > Web.
-2. Usar a URL base `https://biblio-webapi.onrender.com`.
-3. Escolher autenticação **Básica**.
-4. Informar uma conta Django destinada ao Power BI.
-5. Criar a consulta `FontePowerBI` com o conteúdo de
-   `queries/FontePowerBI.pq`.
-6. Criar as demais consultas como referências à `FontePowerBI`.
+1. usar a URL base `https://biblio-webapi.onrender.com`;
+2. selecionar autenticação **Básica**;
+3. informar a conta técnica destinada ao Power BI.
 
-Não colocar usuário ou senha dentro dos arquivos `.pq`.
+A conta é mantida no backend por variáveis de ambiente:
 
-A autenticação Básica foi habilitada apenas nesse endpoint analítico. As rotas
-operacionais da plataforma continuam usando TokenAuthentication.
+- `BIBLIO_POWERBI_USERNAME`
+- `BIBLIO_POWERBI_PASSWORD`
+- `BIBLIO_POWERBI_EMAIL`
 
-## 2. Consultas
+A senha não deve ser incluída em arquivos `.pq`, PBIP ou documentação versionada.
 
-Criar com estes nomes:
+A autenticação Básica é aceita apenas no endpoint analítico do Power BI. As rotas operacionais da plataforma permanecem protegidas pela autenticação por token.
 
-- FontePowerBI
-- DimBairro
-- DimUnidade
-- FatoAcervo
-- FatoCirculacaoMensal
-- FatoDevolucoesMensal
-- FatoTitulos
-- DimCalendario
-- QualidadeIBGE
+## 3. Modelo semântico
 
-## 3. Relacionamentos
+Tabelas principais:
 
-Usar relações de filtro simples:
+- Bairros;
+- Bibliotecas;
+- Acervo;
+- Circulação Mensal;
+- Devoluções Mensais;
+- Títulos;
+- Calendário;
+- Qualidade IBGE.
 
-- `DimBairro[cd_bairro]` 1 → * `DimUnidade[ibge_bairro_codigo]`
-- `DimUnidade[unidade_id]` 1 → * `FatoAcervo[unidade_id]`
-- `DimUnidade[unidade_id]` 1 → * `FatoCirculacaoMensal[unidade_id]`
-- `DimUnidade[unidade_id]` 1 → * `FatoDevolucoesMensal[unidade_id]`
-- `DimUnidade[unidade_id]` 1 → * `FatoTitulos[unidade_id]`
-- `DimCalendario[MesInicio]` 1 → * `FatoCirculacaoMensal[mes]`
-- `DimCalendario[MesInicio]` 1 → * `FatoDevolucoesMensal[mes]`
+Relacionamentos são mantidos com filtro simples para evitar caminhos ambíguos.
 
-Não criar relações adicionais das tabelas fato diretamente com `DimBairro`.
-O bairro chega aos fatos pela dimensão de unidade; isso evita caminhos
-ambíguos.
+A dimensão territorial se liga ao acervo e à circulação por meio da dimensão de biblioteca/unidade.
 
-## 4. Medidas
+## 4. Tratamento de tabelas vazias
 
-Criar as medidas de `medidas.dax`.
+As tabelas fato preservam seu esquema mesmo quando a API retorna zero registros.
 
-As medidas territoriais associadas à biblioteca usam `TREATAS` e exigem uma
-única unidade selecionada. Isso evita transformar a localização de uma
-biblioteca em uma inferência sobre toda a população de Santos.
+Isso é necessário, por exemplo, quando ainda não existem devoluções registradas: a tabela **Devoluções Mensais** pode permanecer vazia sem causar erro de atualização por ausência da coluna `mes`.
 
-Não criar nesta etapa:
-- “índice de déficit do acervo”;
-- “preferência literária do bairro”;
-- “demanda estimada por gênero”.
+Não criar dados fictícios para preencher fatos vazios.
 
-Esses indicadores exigiriam uma regra metodológica validada com a biblioteca
-parceira e não podem ser deduzidos apenas das variáveis sociodemográficas.
+## 5. Páginas implementadas
 
-## 5. Páginas recomendadas
+### 5.1 Visão Geral
 
-### Página 1 — Visão Geral
+Exibe:
 
-Cards:
-- Títulos
-- Exemplares
-- Exemplares disponíveis
-- Empréstimos abertos
-- Empréstimos iniciados
-- Devoluções
-
-Visuais:
+- títulos;
+- exemplares;
+- empréstimos abertos;
+- exemplares disponíveis;
 - exemplares por gênero;
 - exemplares por tipo de obra;
-- acervo e circulação por unidade.
+- acervo e circulação por biblioteca.
 
-### Página 2 — Território
+### 5.2 Território
 
-Usar o visual **Azure Maps**.
+Exibe:
 
-Camada de referência:
+- 55 bairros no recorte confirmado;
+- cobertura dos indicadores territoriais;
+- mapa Azure Maps;
+- tabela de indicadores sociodemográficos por bairro.
+
+O mapa atualmente publicado usa **bolhas georreferenciadas por bairro**, dimensionadas pela população.
+
+O arquivo GeoJSON oficial dos bairros permanece versionado em:
+
 `data/pi4/ibge_santos_bairros.geojson`
 
-Campo de localização:
-`DimBairro[cd_bairro]`
+e pode ser utilizado em refinamentos futuros para representação por polígonos. A camada poligonal não deve ser documentada como ativa enquanto não estiver efetivamente aplicada ao relatório publicado.
 
-A propriedade de ligação do GeoJSON é:
-`cd_bairro`
+### 5.3 Acervo × Território
 
-O arquivo contém os 55 bairros de Santos com todos os indicadores confirmados usados no painel. Utilizar formatação
-condicional separadamente para:
-- população;
-- participação das faixas etárias;
-- taxa de alfabetização de 15 anos ou mais;
+Possui filtro de biblioteca e apresenta, lado a lado:
+
+- composição do acervo;
+- população do bairro da unidade;
+- taxa de alfabetização;
 - rendimento mediano da pessoa responsável pelo domicílio.
 
-Valores ausentes devem permanecer sem preenchimento analítico, nunca ser
-convertidos em zero.
+As medidas territoriais exigem a seleção de uma única biblioteca. Quando nenhuma unidade específica está selecionada, esses indicadores permanecem em branco por decisão metodológica.
 
-### Página 3 — Acervo × Território
+### 5.4 Circulação
 
-Slicer de uma única biblioteca.
+Exibe:
 
-Exibir lado a lado:
-- composição do acervo por gênero e tipo;
-- população do bairro da unidade;
-- distribuição etária do bairro;
-- taxa de alfabetização;
-- rendimento mediano do responsável.
+- empréstimos iniciados;
+- devoluções;
+- títulos com circulação;
+- exemplares disponíveis;
+- série mensal de circulação;
+- títulos com circulação.
 
-Título sugerido:
-“Contexto territorial da unidade e composição do acervo”.
+Quando não há devoluções registradas, o indicador permanece vazio; não é convertido artificialmente em zero.
 
-Não usar linguagem causal (“a população prefere”, “há demanda por”) sem
-evidência específica.
+### 5.5 Qualidade e Metodologia
 
-### Página 4 — Circulação
+Exibe:
 
-- série mensal de empréstimos;
-- série mensal de devoluções;
-- ranking de títulos;
-- filtros por unidade, gênero e tipo de obra;
-- disponibilidade atual.
+- bairros no recorte;
+- bairros com e sem rendimento publicado;
+- diferenças entre os universos Básico e Demografia;
+- diferenças entre total demográfico e soma das faixas etárias;
+- tabela de cobertura territorial.
 
-### Página 5 — Qualidade e Metodologia
+Essas diferenças são preservadas e documentadas, não corrigidas artificialmente.
 
-Exibir:
-- 55 bairros no recorte confirmado;
-- 55 bairros com rendimento publicado;
-- 0 bairros incompletos no recorte publicado;
-- diferenças entre os universos Básico/Demografia;
-- diferenças entre total demográfico e soma das faixas;
-- fonte: IBGE — Censo Demográfico 2022;
-- indicação de que rendimento é da pessoa responsável pelo domicílio.
+## 6. Regras metodológicas
 
-## 6. Mapa
+Os indicadores territoriais têm finalidade descritiva.
 
-O GeoJSON foi gerado a partir de
-`SP_bairros_CD2022.zip`, malha oficial do IBGE, em SIRGAS 2000 (EPSG:4674),
-e validado contra os 55 códigos mantidos na tabela analítica confirmada.
+Não inferir automaticamente:
 
-No Azure Maps, a camada de referência pode ser vinculada aos dados pelo campo
-`cd_bairro`, presente tanto na dimensão quanto nas propriedades do GeoJSON.
+- preferência literária do bairro;
+- demanda por gênero;
+- déficit de acervo;
+- causalidade entre perfil sociodemográfico e circulação.
 
-## 7. Publicação e incorporação
+Rendimento refere-se à **pessoa responsável pelo domicílio**, e não à renda integral de todos os moradores.
 
-Para a versão final, preferir **incorporação segura** do Power BI Service:
+Alfabetização não deve ser apresentada como sinônimo de escolaridade ou nível de instrução.
 
-1. publicar o relatório no Power BI Service;
-2. conceder acesso apenas aos usuários autorizados;
-3. Arquivo > Inserir relatório > Site ou portal;
-4. copiar a URL segura de incorporação;
-5. configurar essa URL como `VITE_POWERBI_EMBED_URL` no projeto Vercel;
-6. republicar o frontend.
+## 7. Publicação no Power BI Service
 
-Não usar “Publicar na Web” como atalho para conteúdo que não tenha sido
-explicitamente autorizado para acesso público.
+Publicação realizada a partir do Power BI Desktop no workspace disponível da conta institucional.
 
-A incorporação segura exige autenticação no Power BI e licenciamento/capacidade
-compatível com a conta Microsoft da instituição.
+Fluxo adotado:
 
-## 8. Atualização
+1. carregar e validar os dados no Power BI Desktop;
+2. publicar o relatório no Power BI Service;
+3. abrir o relatório no Service;
+4. usar **Arquivo → Inserir relatório → Site ou portal**;
+5. copiar a URL segura de incorporação;
+6. integrar a URL ao frontend.
 
-Ao publicar o modelo semântico no Power BI Service, configurar as credenciais
-da fonte Web como **Básica**. Não usar o modo Web API para o refresh no
-serviço.
+Não usar **Publicar na Web**, pois essa modalidade cria acesso público ao conteúdo.
 
-O endpoint analítico é dinâmico para acervo e circulação. As bases IBGE estão
-versionadas no repositório e só devem ser substituídas quando houver uma nova
-versão oficial documentada.
+## 8. Incorporação no frontend
 
-## 9. Evidências para o relatório final
+O Dashboard da aplicação incorpora o relatório em um `iframe`.
 
-Registrar:
-- data da atualização do conjunto de dados;
-- número de linhas por tabela;
-- captura das relações do modelo;
-- páginas do painel;
-- teste de filtros;
+O frontend aceita:
+
+`VITE_POWERBI_EMBED_URL`
+
+como override opcional da URL incorporada.
+
+Na ausência dessa variável, o componente utiliza a URL segura atualmente publicada para o PI4.
+
+A alteração futura do relatório ou da URL de incorporação pode ser feita por variável de ambiente sem necessidade de alterar a lógica do Dashboard.
+
+## 9. Atualização dos dados
+
+O endpoint analítico é dinâmico para acervo e circulação.
+
+As bases territoriais do IBGE são versionadas no repositório e só devem ser substituídas quando houver nova versão oficial documentada.
+
+### Power BI Desktop
+
+Atualização manual validada com autenticação Básica.
+
+### Power BI Service
+
+Após a publicação, a atualização automática do modelo semântico deve usar credenciais da fonte Web em modo **Básico**.
+
+A configuração e o teste de atualização agendada no Service devem ser verificados separadamente da publicação e da incorporação do relatório.
+
+## 10. Licenciamento
+
+A incorporação segura **Site ou portal** respeita as permissões do Power BI.
+
+Seu funcionamento contínuo depende de:
+
+- autenticação Microsoft adequada;
+- licença Power BI compatível ou capacidade aplicável;
+- políticas do tenant Microsoft.
+
+A publicação técnica do relatório não deve ser tratada como garantia de acesso irrestrito para qualquer usuário externo.
+
+## 11. Evidências já obtidas
+
+Concluído em 08/10/2026:
+
+- conexão da fonte autenticada;
+- carregamento do modelo no Power BI Desktop;
+- tratamento de fatos vazios;
+- validação das cinco páginas;
 - teste do mapa;
-- teste de refresh;
-- teste de incorporação na plataforma;
-- feedback da Biblioteca Municipal Mário Faria.
+- publicação no Power BI Service;
+- geração de link seguro de incorporação;
+- integração do Power BI no frontend;
+- build e testes automatizados do frontend após a integração.
+
+Ainda devem ser registrados conforme o fechamento acadêmico:
+
+- teste de atualização automática no Power BI Service;
+- feedback da Biblioteca Municipal Mário Faria;
+- capturas finais das páginas e da incorporação para o relatório do PI4.
