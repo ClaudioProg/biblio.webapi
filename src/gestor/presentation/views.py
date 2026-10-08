@@ -342,7 +342,7 @@ class UsuarioViewSet(ProtectLoanHistoryMixin, viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["nome", "email", "telefone", "documento", "observacoes"]
     ordering_fields = ["id", "nome", "email", "ativo"]
-    ordering = ["id"]
+    ordering = ["titulo", "id"]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -500,7 +500,7 @@ class LivroViewSet(ProtectLoanHistoryMixin, viewsets.ModelViewSet):
             Livro.objects.all()
             .select_related("tipo_obra", "genero")
             .prefetch_related(unidades_prefetch, open_loans_prefetch)
-            .order_by("id")
+            .order_by("titulo", "id")
         )
 
         p = self.request.query_params
