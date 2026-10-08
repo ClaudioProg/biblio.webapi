@@ -756,15 +756,15 @@ class GestorApiRegressionTests(APITestCase):
         response = public_client.get("/gestor/analytics/resumo/")
         self.assertEqual(response.status_code, 401)
 
-    def test_territory_analytics_returns_70_neighborhoods(self):
+    def test_territory_analytics_returns_55_confirmed_neighborhoods(self):
         response = self.client.get("/gestor/analytics/territorio/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["cobertura"]["bairros_total"], 70)
+        self.assertEqual(response.data["cobertura"]["bairros_total"], 55)
         self.assertEqual(response.data["cobertura"]["bairros_com_renda"], 55)
-        self.assertEqual(response.data["cobertura"]["bairros_sem_renda"], 15)
+        self.assertEqual(response.data["cobertura"]["bairros_sem_renda"], 0)
         self.assertFalse(response.data["meta"]["contem_dados_pessoais"])
-        self.assertEqual(len(response.data["bairros"]), 70)
+        self.assertEqual(len(response.data["bairros"]), 55)
 
     def test_territory_analytics_can_filter_paqueta_by_code(self):
         response = self.client.get(
@@ -778,18 +778,13 @@ class GestorApiRegressionTests(APITestCase):
         self.assertEqual(bairro["cd_bairro"], "3548500016")
         self.assertTrue(bairro["renda_disponivel"])
 
-    def test_territory_analytics_preserves_missing_income_as_null(self):
+    def test_territory_analytics_excludes_unconfirmed_neighborhood(self):
         response = self.client.get(
             "/gestor/analytics/territorio/?codigo=3548500031"
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data["bairros"]), 1)
-        bairro = response.data["bairros"][0]
-        self.assertEqual(bairro["bairro"], "Porto Valongo")
-        self.assertFalse(bairro["renda_disponivel"])
-        self.assertIsNone(bairro["renda_responsavel_media"])
-        self.assertIsNone(bairro["renda_responsavel_mediana"])
+        self.assertEqual(response.data["bairros"], [])
 
     def test_territory_analytics_requires_authentication(self):
         public_client = APIClient()
@@ -828,7 +823,7 @@ class GestorApiRegressionTests(APITestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.data["meta"]["contem_dados_pessoais"])
-        self.assertEqual(len(response.data["dim_bairro"]), 70)
+        self.assertEqual(len(response.data["dim_bairro"]), 55)
 
         unidade = response.data["dim_unidade"][0]
         self.assertEqual(unidade["ibge_bairro_codigo"], "3548500005")
