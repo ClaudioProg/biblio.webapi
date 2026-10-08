@@ -104,7 +104,7 @@ Campo de localização:
 A propriedade de ligação do GeoJSON é:
 `cd_bairro`
 
-O arquivo contém os 70 bairros oficiais de Santos. Utilizar formatação
+O arquivo contém os 55 bairros de Santos com todos os indicadores confirmados usados no painel. Utilizar formatação
 condicional separadamente para:
 - população;
 - participação das faixas etárias;
@@ -142,9 +142,9 @@ evidência específica.
 ### Página 5 — Qualidade e Metodologia
 
 Exibir:
-- 70 bairros no recorte;
+- 55 bairros no recorte confirmado;
 - 55 bairros com rendimento publicado;
-- 15 bairros sem rendimento publicado;
+- 0 bairros incompletos no recorte publicado;
 - diferenças entre os universos Básico/Demografia;
 - diferenças entre total demográfico e soma das faixas;
 - fonte: IBGE — Censo Demográfico 2022;
@@ -154,7 +154,7 @@ Exibir:
 
 O GeoJSON foi gerado a partir de
 `SP_bairros_CD2022.zip`, malha oficial do IBGE, em SIRGAS 2000 (EPSG:4674),
-e validado contra os 70 códigos da tabela analítica.
+e validado contra os 55 códigos mantidos na tabela analítica confirmada.
 
 No Azure Maps, a camada de referência pode ser vinculada aos dados pelo campo
 `cd_bairro`, presente tanto na dimensão quanto nas propriedades do GeoJSON.
