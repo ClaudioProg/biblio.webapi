@@ -423,6 +423,29 @@ class GestorApiRegressionTests(APITestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("ibge_bairro_codigo", response.data)
 
+    def test_livro_list_is_ordered_alphabetically_by_title(self):
+        livros = [
+            ("Zoologia", "9780000000101"),
+            ("Abelhas", "9780000000102"),
+            ("Bibliotecas", "9780000000103"),
+        ]
+        for titulo, isbn in livros:
+            Livro.objects.create(
+                titulo=titulo,
+                autor="Autor",
+                isbn=isbn,
+                genero=self.genero,
+                tipo_obra=self.tipo,
+            )
+
+        response = self.client.get("/gestor/livros/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [item["titulo"] for item in response.data],
+            ["Abelhas", "Bibliotecas", "Zoologia"],
+        )
+
     def test_livro_list_avoids_n_plus_one_queries(self):
         for index in range(20):
             livro = Livro.objects.create(
