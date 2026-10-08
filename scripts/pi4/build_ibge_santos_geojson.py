@@ -16,7 +16,7 @@ from typing import Any
 import shapefile
 
 MUNICIPALITY_CODE = "3548500"
-EXPECTED_NEIGHBORHOODS = 70
+EXPECTED_NEIGHBORHOODS = 55
 USER_AGENT = "BibliotecasConectadas-PI4/1.0"
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -109,6 +109,9 @@ def generate_geojson(
                 continue
 
             code = str(record["CD_BAIRRO"])
+            if code not in expected_codes:
+                continue
+
             if code in shape_codes:
                 raise GeoDataError(f"Código de bairro duplicado na malha: {code}.")
 
