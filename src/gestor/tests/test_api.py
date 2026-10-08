@@ -24,6 +24,15 @@ from gestor.infrastructure.external_book_services import (
 
 class GestorApiRegressionTests(APITestCase):
     def setUp(self):
+        # A produção possui um catálogo inicial versionado. Os testes de API
+        # precisam permanecer isolados e não depender da quantidade de dados
+        # carregada pela migração de homologação.
+        Emprestimo.objects.all().delete()
+        LivroUnidade.objects.all().delete()
+        Livro.objects.all().delete()
+        Unidade.objects.all().delete()
+        Usuario.objects.all().delete()
+
         self.auth_user = get_user_model().objects.create_user(
             username="gestor_teste",
             password="SenhaForte123!",
